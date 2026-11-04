@@ -130,7 +130,9 @@ export function toRuleset(input: AuthoringInputT, contacts: readonly Contact[]):
   }
   for (const x of input.conditionalExtras) {
     const recipientId = resolve(x.recipientName);
-    const trig = slug(x.purpose || x.trigger.replace(new RegExp(`^${x.recipientName}\\s+(does|did|has|makes)?\\s*(a|an)?\\s*`, "i"), ""));
+    // A short purpose for titles: the stated one, else the trigger minus "<name> does a".
+    const short = (x.purpose.trim() || x.trigger.replace(new RegExp(`^${x.recipientName}\\s+(does|did|has|makes|gets)?\\s*(a|an|the)?\\s*`, "i"), "")).trim();
+    const trig = slug(short);
     rules.push({
       kind: "extra",
       id: uniqueId(`${recipientId}-${trig || "extra"}`),
@@ -138,7 +140,7 @@ export function toRuleset(input: AuthoringInputT, contacts: readonly Contact[]):
       amountCents: x.amountCents,
       trigger: x.trigger.trim(),
       maxPerMonth: x.maxTimesPerMonth,
-      purpose: x.purpose.trim(),
+      purpose: short,
     });
   }
   const capIdFor = new Map<string | null, string>();

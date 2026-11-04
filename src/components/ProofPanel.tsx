@@ -161,7 +161,7 @@ function Counterexample({ report, rs, clock, chart }: { report: VerifyReport; rs
           <div key={s.key} role="row" className={`cx-row ${s.kind === "extra" ? "event" : ""} ${i === firstOver || i === cx.steps.length - 1 && s.runningCents > cx.limitCents ? "over" : ""}`}>
             <span className="mono small">{formatDate(s.date, { weekday: true })}</span>
             <span className={s.outcome !== "paid" ? "skipped" : ""}>
-              {s.kind === "extra" ? <><span className="pill hold">event</span> {trigger(s.ruleId)} · {title(s.ruleId)}</> : title(s.ruleId)}
+              {s.kind === "extra" ? <><span className="pill hold">event</span> {trigger(s.ruleId)}</> : title(s.ruleId)}
             </span>
             <span className="r money small">{formatMoney(s.amountCents, { currency: false })}</span>
             <span className="r money small run">{formatMoney(s.runningCents, { currency: false })}</span>
@@ -249,7 +249,7 @@ function MonthChart({ report }: { report: VerifyReport }) {
               <title>{`${m.label}: worst case ${formatMoney(c.worstCaseCents)}${m.sameShapeAs ? " (proof shared with a month of the same shape)" : ""}`}</title>
               <rect x={x} y={y(c.worstCaseCents)} width={w} height={Math.max(2, top + plot - y(c.worstCaseCents))} rx={5}
                 style={{ fill: broken ? "var(--breach-2)" : "color-mix(in srgb, var(--proof) 72%, var(--card))", transition: "all .5s" }} />
-              <text x={x + w / 2} y={y(c.worstCaseCents) + 15} textAnchor="middle" className="mono"
+              <text x={x + w / 2} y={top + plot - 8} textAnchor="middle" className="mono"
                 style={{ fontSize: 11, fill: "#fff", fontWeight: 700 }}>
                 {formatMoney(c.worstCaseCents, { compact: true, currency: false })}
               </text>

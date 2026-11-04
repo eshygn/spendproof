@@ -6,6 +6,7 @@ const nextConfig: NextConfig = {
   serverExternalPackages: ["z3-solver", "better-sqlite3"],
   poweredByHeader: false,
   agentRules: false,
+  devIndicators: false,
 };
 
 export default nextConfig;

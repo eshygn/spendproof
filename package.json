@@ -13,7 +13,8 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "check": "npm run lint && npm run typecheck && npm run test && npm run build"
+    "check": "npm run lint && npm run typecheck && npm run test && npm run build",
+    "dev:mock": "SPENDPROOF_FORCE_MOCK=1 next dev"
   },
   "dependencies": {
     "@ai-sdk/google": "^4.0.111",

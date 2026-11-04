@@ -85,7 +85,11 @@ export function PayoutsPanel({ state, run, busy }: { state: Snapshot; run: Run; 
                       <td className="r money nw">{formatMoney(p.amountCents)}</td>
                       <td>
                         <StatusPill status={p.status} />
-                        {errName ? <div className="tiny" style={{ color: "var(--breach)", marginTop: 3 }}>{errName}</div> : null}
+                        {errName && p.status === "unclaimed" ? (
+                          <div className="tiny muted" style={{ marginTop: 3 }} title={errName}>awaiting claim · no sandbox account</div>
+                        ) : errName ? (
+                          <div className="tiny" style={{ color: "var(--breach)", marginTop: 3 }}>{errName}</div>
+                        ) : null}
                         {p.status === "blocked" ? <div className="tiny" style={{ color: "var(--breach)", marginTop: 3 }}>{p.verdict.violations.map((v) => v.ruleTitle).join(", ")}</div> : null}
                       </td>
                       <td className="hide-sm"><span className="hash">{p.rulesHash}</span></td>

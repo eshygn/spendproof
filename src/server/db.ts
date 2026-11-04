@@ -2,7 +2,7 @@ import "server-only";
 import Database from "better-sqlite3";
 import fs from "node:fs";
 import path from "node:path";
-import { DEMO_CONTACTS, DEMO_EVENTS, DEMO_MESSAGES, DEMO_START } from "@/domain/demo";
+import { contactsWithOverrides, DEMO_EVENTS, DEMO_MESSAGES, DEMO_START, withContactEmails } from "@/domain/demo";
 
 /**
  * SQLite through better-sqlite3. One file, created and seeded on boot.
@@ -156,13 +156,17 @@ function seed(db: Database.Database) {
     meta.run("fail_next_batch", "1");
     meta.run("seeded_at", new Date().toISOString());
     const c = db.prepare("INSERT INTO contacts (id, name, email, role) VALUES (?, ?, ?, ?)");
-    for (const x of DEMO_CONTACTS) c.run(x.id, x.name, x.email, x.role);
+    const contacts = contactsWithOverrides();
+    for (const x of contacts) c.run(x.id, x.name, x.email, x.role);
     const e = db.prepare("INSERT INTO events (rule_trigger, date, note, source) VALUES (?, ?, ?, 'seed')");
     for (const x of DEMO_EVENTS) e.run(x.ruleTrigger, x.date, x.note);
     const m = db.prepare(
       "INSERT INTO messages (id, channel, sender, sender_address, subject, received_on, body, raw) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
     );
-    for (const x of DEMO_MESSAGES) m.run(x.id, x.channel, x.from, x.fromAddress, x.subject, x.receivedOn, x.body, x.raw);
+    for (const x of DEMO_MESSAGES) {
+      const sub = (t: string) => withContactEmails(t, contacts);
+      m.run(x.id, x.channel, x.from, sub(x.fromAddress), x.subject, x.receivedOn, sub(x.body), sub(x.raw));
+    }
     db.prepare(
       "INSERT INTO fundings (order_id, amount_cents, status, mode, payer, date) VALUES ('SEED-OCT-TOPUP', ?, 'COMPLETED', 'seed', 'October top-up', '2026-10-28')",
     ).run(SEED_BALANCE_CENTS);

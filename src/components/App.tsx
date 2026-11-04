@@ -217,6 +217,7 @@ function Rail({ state, run, busy, onJump }: { state: Snapshot; run: Run; busy: s
 
 function shortReason(reason: string): string {
   if (/No GOOGLE_GENERATIVE_AI_API_KEY/.test(reason)) return "no API key";
+  if (/FORCE_MOCK/.test(reason)) return "mock mode";
   if (/429|Rate limit/i.test(reason)) return "rate-limited";
   if (/503|overloaded/i.test(reason)) return "model busy";
   return "offline";
