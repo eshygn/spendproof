@@ -210,7 +210,7 @@ export function evaluatePayout(req: PayoutRequest, ctx: GateContext): Verdict {
           severity: "block",
           ruleId: cap.id,
           ruleTitle: title,
-          message: `It fits today, but leaves no room for the ${money(reserved)} of scheduled payments still due in ${monthName(month)} — a guaranteed payment would be refused later.`,
+          message: `It fits today, but leaves no room for the ${money(reserved)} of scheduled payments still due in ${monthName(month)}, so a guaranteed payment would be refused later.`,
         });
       } else passed.push(`Fits "${title}" with ${money(reserved)} reserved for payments still due`);
     }

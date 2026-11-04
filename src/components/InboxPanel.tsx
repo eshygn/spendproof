@@ -91,7 +91,7 @@ export function InboxPanel({ state, run, busy }: { state: Snapshot; run: Run; bu
           <div className="card-h">
             <Icon name="bot" />
             <h2>Chat agent</h2>
-            <span className="pill hold">untrusted · no PayPal credentials</span>
+            <span className="pill hold">Untrusted. Has no PayPal credentials.</span>
           </div>
           <div className="card-b agent">
             {!state.active ? (
@@ -136,8 +136,7 @@ function Proposal({
     <div className="proposal">
       <div className="proposal-h">
         <div>
-          <div className="upper">Proposed payment</div>
-          <div style={{ fontWeight: 600 }}>{p.payee_name}</div>
+          <div style={{ fontWeight: 600 }}>Pay {p.payee_name}</div>
           <div className="small muted mono">{p.payee_email}</div>
         </div>
         <span className="amt money">{formatMoney(p.amount_cents)}</span>
@@ -147,12 +146,12 @@ function Proposal({
         <div className="gate-title">
           <Icon name="shield" />
           {p.status === "blocked"
-            ? `Gatekeeper blocked it — breaks ${blocks.length} rule${blocks.length === 1 ? "" : "s"}`
+            ? `Blocked by the gatekeeper. It breaks ${blocks.length + holds.length} rule${blocks.length + holds.length === 1 ? "" : "s"}.`
             : p.status === "needs_approval"
-              ? "Gatekeeper: needs your approval"
+              ? "Needs your approval"
               : p.status === "rejected"
                 ? "You declined it"
-                : "Gatekeeper allowed it — sent to PayPal"}
+                : "Allowed by the gatekeeper and sent to PayPal"}
           <span className="spacer" />
           <span className="hash">{v.rulesHash}</span>
         </div>

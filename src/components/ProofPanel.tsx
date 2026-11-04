@@ -30,7 +30,7 @@ export function ProofPanel({ state, run, busy, onActivated }: { state: Snapshot;
     return (
       <section className="card">
         <div className="card-h"><Icon name="shield" /><h2>Proof</h2></div>
-        <div className="card-b"><div className="callout">Confirm the rules on the left. Z3 checks the rules you confirm — nothing else.</div></div>
+        <div className="card-b"><div className="callout">Confirm the rules on the left. Z3 checks the rules you confirm and nothing else.</div></div>
       </section>
     );
   }
@@ -91,7 +91,7 @@ export function ProofPanel({ state, run, busy, onActivated }: { state: Snapshot;
       </div>
 
       {report.verdict === "counterexample" ? (
-        <Repairs repairs={ver.repairs} busy={busy} onApply={(id) => run("applyRepair", { type: "applyRepair", id: shown.id, repairId: id }, { toast: "Repair applied — verifying again with Z3." })} />
+        <Repairs repairs={ver.repairs} busy={busy} onApply={(id) => run("applyRepair", { type: "applyRepair", id: shown.id, repairId: id }, { toast: "Repair applied. Verifying again with Z3." })} />
       ) : null}
 
       {report.verdict === "verified" && shown.status === "draft" ? (
@@ -115,7 +115,7 @@ function Explainer() {
       <div className="card-h"><Icon name="shield" /><h2>What Spendproof proves</h2></div>
       <div className="card-b stack">
         <p style={{ margin: 0, fontSize: 14 }}>
-          Plain-English spending rules hide edge cases — like a month with five Fridays. Spendproof turns your rules into data, then asks the
+          Plain-English spending rules hide edge cases, like a month with five Fridays. Spendproof turns your rules into data, then asks the
           Z3 theorem prover whether <i>any</i> possible sequence of events in the next 12 months breaks them.
         </p>
         <div className="callout">
@@ -161,7 +161,7 @@ function Counterexample({ report, rs, clock, chart }: { report: VerifyReport; rs
           <div key={s.key} role="row" className={`cx-row ${s.kind === "extra" ? "event" : ""} ${i === firstOver || i === cx.steps.length - 1 && s.runningCents > cx.limitCents ? "over" : ""}`}>
             <span className="mono small">{formatDate(s.date, { weekday: true })}</span>
             <span className={s.outcome !== "paid" ? "skipped" : ""}>
-              {s.kind === "extra" ? <><span className="pill hold">event</span> {trigger(s.ruleId)}</> : title(s.ruleId)}
+              {s.kind === "extra" ? <><span className="ev">Event</span>{trigger(s.ruleId)}</> : title(s.ruleId)}
             </span>
             <span className="r money small">{formatMoney(s.amountCents, { currency: false })}</span>
             <span className="r money small run">{formatMoney(s.runningCents, { currency: false })}</span>
@@ -177,15 +177,15 @@ function Counterexample({ report, rs, clock, chart }: { report: VerifyReport; rs
       ) : null}
 
       <div>
-        <div className="upper" style={{ marginBottom: 6 }}>Unsat core — the rules that collide</div>
-        <div className="row wrap" style={{ gap: 6 }}>
-          {f.core.map((id) => <span key={id} className="pill breach">{title(id)}</span>)}
-        </div>
+        <h3>The rules that collide (unsat core)</h3>
+        <ul className="core-list">
+          {f.core.map((id) => <li key={id}>{title(id)}</li>)}
+        </ul>
         <p className="small muted" style={{ margin: "6px 0 0" }}>
           Under these events the {f.core.length} rules can’t all hold. The core is minimal: drop any one and the clash disappears.
         </p>
       </div>
-      <div className="row tiny muted"><Icon name="check" size={13} /> Replayed in the TypeScript simulator before being shown: confirmed.</div>
+      <p className="tiny muted" style={{ margin: 0 }}>Replayed through the TypeScript simulator before being shown, and confirmed.</p>
     </>
   );
 }
@@ -234,9 +234,9 @@ function MonthChart({ report }: { report: VerifyReport }) {
   return (
     <div>
       <div className="row">
-        <span className="upper">Worst case each month · Z3 Optimize</span>
+        <h3>Worst case each month</h3>
         <span className="spacer" />
-        <span className="tiny muted">dashed line: {formatMoney(limit, { compact: true, currency: false })} cap</span>
+        <span className="tiny muted">Z3 Optimize · dashed line is the {formatMoney(limit, { compact: true, currency: false })} cap</span>
       </div>
       <svg viewBox={`0 0 ${W} ${H}`} width="100%" role="img" aria-label="Worst-case total per month against the cap" style={{ display: "block", marginTop: 6 }}>
         {rows.map(({ m, c }, i) => {
@@ -247,8 +247,8 @@ function MonthChart({ report }: { report: VerifyReport }) {
           return (
             <g key={m.month}>
               <title>{`${m.label}: worst case ${formatMoney(c.worstCaseCents)}${m.sameShapeAs ? " (proof shared with a month of the same shape)" : ""}`}</title>
-              <rect x={x} y={y(c.worstCaseCents)} width={w} height={Math.max(2, top + plot - y(c.worstCaseCents))} rx={5}
-                style={{ fill: broken ? "var(--breach-2)" : "color-mix(in srgb, var(--proof) 72%, var(--card))", transition: "all .5s" }} />
+              <rect x={x} y={y(c.worstCaseCents)} width={w} height={Math.max(2, top + plot - y(c.worstCaseCents))} rx={2}
+                style={{ fill: broken ? "var(--breach)" : "color-mix(in srgb, var(--proof) 78%, var(--surface))", transition: "all .4s" }} />
               <text x={x + w / 2} y={top + plot - 8} textAnchor="middle" className="mono"
                 style={{ fontSize: 11, fill: "#fff", fontWeight: 700 }}>
                 {formatMoney(c.worstCaseCents, { compact: true, currency: false })}
@@ -271,7 +271,7 @@ function Repairs({ repairs, busy, onApply }: { repairs: Repair[] | null; busy: s
       <div className="card-h">
         <Icon name="retry" />
         <h2>Repairs</h2>
-        <span className="tiny muted">each one already re-checked by Z3</span>
+        <span className="tiny muted">each one already checked by Z3</span>
       </div>
       <div className="card-b">
         {!repairs ? (

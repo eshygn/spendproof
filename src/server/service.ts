@@ -210,7 +210,7 @@ export async function applyRepair(id: number, repairId: string) {
   const old = getRuleset(id) as RulesetRow;
   // Clicking the repair confirms the change shown on it, in template English.
   const row = insertDraft(repair.ruleset, "repair", old.prompt, `${repair.title}: ${repair.text}`, old.unsupported, true, [repair.ruleId]);
-  logActivity(clock(), "repair", `Applied repair — ${repair.text}`);
+  logActivity(clock(), "repair", `Applied a repair: ${repair.text}`);
   const verification = await verifyRuleset(row.id);
   return { draft: row, verification };
 }
@@ -346,7 +346,7 @@ async function sendBatch(date: string, items: QueuedPayout[]) {
   } else {
     db().prepare("UPDATE batches SET status = 'FAILED', error = ? WHERE id = ?").run(JSON.stringify(result.body), batchId);
     db().prepare("UPDATE payouts SET status = 'failed', error = ? WHERE batch_id = ?").run(JSON.stringify(result.body), batchId);
-    logActivity(date, "paypal-failed", `PayPal refused batch ${senderBatchId} (${result.status} ${result.body.name}${simulateFailure ? ", sandbox negative test" : ""}). ${total} not sent — retry available.`);
+    logActivity(date, "paypal-failed", `PayPal refused batch ${senderBatchId} (${result.status} ${result.body.name}${simulateFailure ? ", sandbox negative test" : ""}). ${total} was not sent; you can retry it.`);
   }
   return batchId;
 }
@@ -426,7 +426,7 @@ export async function runDay(date: string): Promise<DayRun> {
     } else {
       insertPayout(req, verdict, "blocked");
       run.blocked.push({ ruleId: inst.ruleId, reasons: verdict.violations.map((v) => `${v.ruleTitle}: ${v.message}`) });
-      logActivity(date, "blocked", `Gatekeeper refused ${ruleTitle(rs, rule)} on ${formatDate(date)} — ${verdict.violations.map((v) => v.ruleTitle).join(", ")}.`);
+      logActivity(date, "blocked", `Gatekeeper refused ${ruleTitle(rs, rule)} on ${formatDate(date)}. Breaks: ${verdict.violations.map((v) => v.ruleTitle).join(", ")}.`);
     }
   }
   await sendBatch(date, queued);
@@ -467,7 +467,7 @@ export async function retryPayout(id: number) {
   };
   const verdict = evaluatePayout(req, ctx);
   if (verdict.decision !== "allow") {
-    logActivity(clock(), "blocked", `Retry refused by the gatekeeper — ${verdict.violations.map((v) => v.ruleTitle).join(", ")}.`);
+    logActivity(clock(), "blocked", `Retry refused by the gatekeeper. Breaks: ${verdict.violations.map((v) => v.ruleTitle).join(", ")}.`);
     return { verdict, payoutId: null };
   }
   const q = insertPayout(req, verdict, "queued", p.id);
@@ -515,7 +515,7 @@ export async function runAgent(input: { messageId?: string; raw?: string }) {
       .run(runId, p.payeeName, p.payeePaypalEmail, p.amountCents, p.reason, p.quotedRequest, JSON.stringify(verdict), status, today);
     const proposalId = Number(pInfo.lastInsertRowid);
     if (status === "blocked") {
-      logActivity(today, "blocked", `Gatekeeper blocked the agent's ${formatMoney(p.amountCents)} payment to ${p.payeeName} — ${verdict.violations.map((v) => v.ruleTitle).join(", ")}.`);
+      logActivity(today, "blocked", `Gatekeeper blocked the agent's ${formatMoney(p.amountCents)} payment to ${p.payeeName}. Breaks: ${verdict.violations.map((v) => v.ruleTitle).join(", ")}.`);
     } else if (status === "allowed") {
       await sendProposal(proposalId, false);
     } else {

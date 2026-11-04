@@ -39,7 +39,7 @@ export default function FundButton({
     );
   }
   return (
-    <PayPalScriptProvider options={{ clientId, currency: "USD", intent: "capture" }}>
+    <PayPalScriptProvider options={{ clientId, currency: "USD", intent: "capture", disableFunding: "paylater,card" }}>
       <PayPalButtons
         style={{ layout: "horizontal", height: 40, tagline: false, label: "pay" }}
         forceReRender={[amountCents]}

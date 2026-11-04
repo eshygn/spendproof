@@ -40,9 +40,8 @@ export function PayoutsPanel({ state, run, busy }: { state: Snapshot; run: Run; 
     <div className="stack">
       <div className="card">
         <div className="card-h">
-          <span className="paypal-tag"><Icon name="bolt" /> PayPal Payouts</span>
-          <h2 style={{ marginLeft: 4 }}>Payout history</h2>
-          <span className="tiny muted">sent by the scheduler, never by the AI · every row stamped with the rules version that allowed it</span>
+          <h2>Payouts</h2>
+          <span className="tiny muted">Sent through PayPal Payouts by the scheduler, never by the AI. Each row records the rules version that allowed it.</span>
           <div className="right">
             <Btn size="sm" kind="ghost" busy={busy === "poll"} onClick={() => run("poll", { type: "poll" })}>Refresh status</Btn>
           </div>
@@ -61,8 +60,7 @@ export function PayoutsPanel({ state, run, busy }: { state: Snapshot; run: Run; 
                   <th className="hide-sm">Rule</th>
                   <th className="r">Amount</th>
                   <th>Status</th>
-                  <th className="hide-sm">Rules version</th>
-                  <th className="hide-sm">PayPal</th>
+                  <th className="hide-sm">Record</th>
                   <th />
                 </tr>
               </thead>
@@ -80,7 +78,7 @@ export function PayoutsPanel({ state, run, busy }: { state: Snapshot; run: Run; 
                       </td>
                       <td className="hide-sm small" style={{ minWidth: 150 }}>
                         {title(p.ruleId)}
-                        {p.retryOf ? <span className="pill accent" style={{ marginLeft: 6 }}>retry</span> : null}
+                        {p.retryOf ? <span className="tiny muted"> · retry</span> : null}
                       </td>
                       <td className="r money nw">{formatMoney(p.amountCents)}</td>
                       <td>
@@ -92,9 +90,9 @@ export function PayoutsPanel({ state, run, busy }: { state: Snapshot; run: Run; 
                         ) : null}
                         {p.status === "blocked" ? <div className="tiny" style={{ color: "var(--breach)", marginTop: 3 }}>{p.verdict.violations.map((v) => v.ruleTitle).join(", ")}</div> : null}
                       </td>
-                      <td className="hide-sm"><span className="hash">{p.rulesHash}</span></td>
                       <td className="hide-sm tiny mono muted nw" title={[b?.sender_batch_id, p.payoutItemId && `item ${p.payoutItemId}`, p.transactionId && `txn ${p.transactionId}`].filter(Boolean).join(" · ")}>
-                        {b?.paypal_batch_id ? <>batch {b.paypal_batch_id}</> : b ? <>not created</> : <>—</>}
+                        <div title="Rules version that allowed this payout">{p.rulesHash}</div>
+                        <div>{b?.paypal_batch_id ? <>PayPal {b.paypal_batch_id}</> : b ? <>not created</> : <>not sent</>}</div>
                       </td>
                       <td className="r">
                         {p.status === "failed" && !p.retriedBy ? (
@@ -131,7 +129,7 @@ export function PayoutsPanel({ state, run, busy }: { state: Snapshot; run: Run; 
                 ))}
               </div>
             ) : (
-              <div className="empty">Nothing scheduled — no rules are live.</div>
+              <div className="empty">Nothing scheduled. No rules are live yet.</div>
             )}
             {extras.map((x) => (
               <div key={x.id} className="row wrap">
@@ -151,8 +149,8 @@ export function PayoutsPanel({ state, run, busy }: { state: Snapshot; run: Run; 
 
         <div className="card">
           <div className="card-h">
-            <span className="paypal-tag"><Icon name="bolt" /> PayPal Checkout</span>
-            <h2 style={{ marginLeft: 4 }}>Top up the balance</h2>
+            <h2>Top up the balance</h2>
+            <span className="tiny muted">PayPal Checkout</span>
           </div>
           <div className="card-b stack" style={{ gap: 10 }}>
             <div className="row">

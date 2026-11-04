@@ -4,7 +4,7 @@ import { useState } from "react";
 import { DEMO_PROMPT } from "@/domain/demo";
 import type { Snapshot } from "@/lib/client";
 import type { Run } from "./App";
-import { Btn, Icon, kindIcon, kindLabel } from "./ui";
+import { Btn, Icon, kindLabel } from "./ui";
 
 export function RulesPanel({ state, run, busy }: { state: Snapshot; run: Run; busy: string | null }) {
   const shown = state.draft ?? state.active;
@@ -69,8 +69,8 @@ export function RulesPanel({ state, run, busy }: { state: Snapshot; run: Run; bu
             <h2>{isDraft ? "Read these back" : "Live rules"}</h2>
             <span className="hash" title="Rules version: hash of the rules JSON">{shown.hash}</span>
             <div className="right">
-              <span className={`pill ${shown.source === "recorded" ? "hold" : shown.source === "repair" ? "proof" : "accent"}`}>
-                {shown.source === "ai" ? "Gemini" : shown.source === "recorded" ? "Recorded AI" : shown.source === "repair" ? "Repaired" : "Edited JSON"}
+              <span className="tiny muted">
+                {shown.source === "ai" ? "Drafted by Gemini" : shown.source === "recorded" ? "Recorded AI draft" : shown.source === "repair" ? "Repaired" : "Edited as JSON"}
               </span>
               <Btn
                 size="sm"
@@ -86,7 +86,7 @@ export function RulesPanel({ state, run, busy }: { state: Snapshot; run: Run; bu
           </div>
           <div className="card-b stack" style={{ gap: 10 }}>
             <p className="small muted" style={{ margin: 0 }}>
-              Generated from a fixed template, not by the AI. Spendproof verifies <b>these rules</b>, not what you meant — so read them.
+              Written from a fixed template, not by the AI. Spendproof checks these rules exactly as written, not what you meant, so read them.
             </p>
             {editJson ? (
               <>
@@ -116,18 +116,13 @@ export function RulesPanel({ state, run, busy }: { state: Snapshot; run: Run; bu
               <ul className="rules">
                 {shown.english.map((r) => (
                   <li key={r.id} className={`rule ${core.has(r.id) ? "core" : ""} ${changed.has(r.id) ? "added" : ""}`}>
-                    <span className="ic">
-                      <Icon name={kindIcon[r.kind]} />
-                    </span>
-                    <div>
-                      <div className="t">
-                        {r.title}
-                        <span className="tiny muted">{kindLabel[r.kind]}</span>
-                        {core.has(r.id) ? <span className="pill breach">in the clash</span> : null}
-                        {changed.has(r.id) ? <span className="pill proof">{r.kind === "skip" ? "added" : "changed"}</span> : null}
-                      </div>
-                      <div className="x">{r.text}</div>
+                    <div className="t">
+                      {r.title}
+                      {core.has(r.id) ? <span className="flag breach">In the clash</span> : null}
+                      {changed.has(r.id) ? <span className="flag proof">{r.kind === "skip" ? "Added" : "Changed"}</span> : null}
+                      <span className="kind">{kindLabel[r.kind]}</span>
                     </div>
+                    <div className="x">{r.text}</div>
                   </li>
                 ))}
               </ul>

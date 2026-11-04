@@ -7,7 +7,7 @@ import { InboxPanel } from "./InboxPanel";
 import { PayoutsPanel } from "./PayoutsPanel";
 import { ProofPanel } from "./ProofPanel";
 import { RulesPanel } from "./RulesPanel";
-import { Btn, Icon, Money } from "./ui";
+import { Btn, Money } from "./ui";
 
 export type Run = (key: string, body: Record<string, unknown>, opts?: { then?: (data: unknown) => void; toast?: string }) => Promise<unknown>;
 
@@ -74,7 +74,7 @@ export function App({ initial }: { initial: Snapshot }) {
             </svg>
           </span>
           <span className="brand-name">Spendproof</span>
-          <span className="brand-tag">rules your payment agent can’t talk its way around</span>
+          <span className="brand-tag">Spending rules, proved before any money moves</span>
         </div>
         <div className="chips">
           <span className={`chip ${state.modes.paypal.mode === "live" ? "live" : "mock"}`} title={state.modes.paypal.reason}>
@@ -97,15 +97,15 @@ export function App({ initial }: { initial: Snapshot }) {
         <main className="main">
           <nav className="tabs" role="tablist" aria-label="Sections">
             <button className="tab" role="tab" aria-selected={tab === "rules"} onClick={() => setTab("rules")}>
-              <span className="num">1</span> Rules &amp; proof
+              Rules &amp; proof
               {state.draft?.verification?.verdict === "counterexample" ? <span className="badge">clash</span> : null}
             </button>
             <button className="tab" role="tab" aria-selected={tab === "inbox"} onClick={() => setTab("inbox")}>
-              <span className="num">2</span> Inbox agent
+              Inbox agent
               {proposalsWaiting ? <span className="badge">{proposalsWaiting}</span> : null}
             </button>
             <button className="tab" role="tab" aria-selected={tab === "payouts"} onClick={() => setTab("payouts")}>
-              <span className="num">3</span> Payouts
+              Payouts
               {failed ? <span className="badge">{failed} failed</span> : null}
             </button>
           </nav>
@@ -152,13 +152,13 @@ function Rail({ state, run, busy, onJump }: { state: Snapshot; run: Run; busy: s
     <aside className="rail">
       <section className="card clock" aria-label="Demo clock">
         <div className="row">
-          <span className="upper">Demo clock</span>
+          <h2>Demo clock</h2>
           <span className="spacer" />
           <Btn size="sm" kind="ghost" busy={busy === "reset"} onClick={() => run("reset", { type: "reset" }, { toast: "Demo reset to 1 November 2026." })}>
             Reset demo
           </Btn>
         </div>
-        <div className="date" style={{ marginTop: 8 }}>{formatDate(state.clock, { year: true })}</div>
+        <div className="date" style={{ marginTop: 10 }}>{formatDate(state.clock, { year: true })}</div>
         <div className="wd">
           {WEEKDAYS[weekday(state.clock)]} · {state.active ? "rules live, scheduler running" : "no rules live yet"}
         </div>
@@ -171,13 +171,12 @@ function Rail({ state, run, busy, onJump }: { state: Snapshot; run: Run; busy: s
 
       <section className="card card-b" aria-label="Balance">
         <div className="row">
-          <span className="upper">Funded balance</span>
-          <span className="spacer" />
-          <span className="tiny muted">PayPal sender account</span>
+          <h2>Balance</h2>
         </div>
-        <div className="display" style={{ fontSize: 26, fontWeight: 600, marginTop: 4 }}>
+        <div className="display money" style={{ fontSize: 24, marginTop: 6 }}>
           <Money cents={state.balanceCents} />
         </div>
+        <div className="tiny muted">Funded in PayPal; payouts draw from it.</div>
         {limit !== null ? (
           <div style={{ marginTop: 12 }}>
             <div className="row small">
@@ -193,8 +192,7 @@ function Rail({ state, run, busy, onJump }: { state: Snapshot; run: Run; busy: s
       </section>
 
       <section className="card" aria-label="Activity" style={{ display: "flex", flexDirection: "column", minHeight: 0, flex: 1 }}>
-        <div className="card-h" style={{ paddingBottom: 10 }}>
-          <Icon name="clock" />
+        <div className="card-h" style={{ paddingBottom: 6 }}>
           <h2>Activity</h2>
         </div>
         <ul className="feed">
