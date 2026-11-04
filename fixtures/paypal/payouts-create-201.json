@@ -1,0 +1,19 @@
+{
+  "batch_header": {
+    "payout_batch_id": "5UXD2E8A7EBQJ",
+    "batch_status": "PENDING",
+    "sender_batch_header": {
+      "sender_batch_id": "spendproof_2026-11-06_ab12cd",
+      "email_subject": "You have a payment from Spendproof",
+      "email_message": "Paid by Spendproof under a verified rule."
+    }
+  },
+  "links": [
+    {
+      "href": "https://api-m.sandbox.paypal.com/v1/payments/payouts/5UXD2E8A7EBQJ",
+      "rel": "self",
+      "method": "GET",
+      "encType": "application/json"
+    }
+  ]
+}

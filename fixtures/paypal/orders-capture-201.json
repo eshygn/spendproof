@@ -1,0 +1,40 @@
+{
+  "id": "5O190127TN364715T",
+  "status": "COMPLETED",
+  "payment_source": {
+    "paypal": {
+      "name": { "given_name": "Jordan", "surname": "Lee" },
+      "email_address": "jordan.lee.buyer@example.com",
+      "account_id": "QYR5Z8XDVJNXQ",
+      "account_status": "VERIFIED"
+    }
+  },
+  "purchase_units": [
+    {
+      "reference_id": "default",
+      "payments": {
+        "captures": [
+          {
+            "id": "3C679366HH908993F",
+            "status": "COMPLETED",
+            "amount": { "currency_code": "USD", "value": "400.00" },
+            "final_capture": true,
+            "seller_receivable_breakdown": {
+              "gross_amount": { "currency_code": "USD", "value": "400.00" },
+              "paypal_fee": { "currency_code": "USD", "value": "14.29" },
+              "net_amount": { "currency_code": "USD", "value": "385.71" }
+            },
+            "create_time": "2026-11-29T10:12:01Z",
+            "update_time": "2026-11-29T10:12:01Z"
+          }
+        ]
+      }
+    }
+  ],
+  "payer": {
+    "name": { "given_name": "Jordan", "surname": "Lee" },
+    "email_address": "jordan.lee.buyer@example.com",
+    "payer_id": "QYR5Z8XDVJNXQ"
+  },
+  "links": [{ "href": "https://api-m.sandbox.paypal.com/v2/checkout/orders/5O190127TN364715T", "rel": "self", "method": "GET" }]
+}

@@ -5,6 +5,7 @@ const nextConfig: NextConfig = {
   // both must be loaded by Node at runtime, never bundled.
   serverExternalPackages: ["z3-solver", "better-sqlite3"],
   poweredByHeader: false,
+  agentRules: false,
 };
 
 export default nextConfig;

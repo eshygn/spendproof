@@ -1,0 +1,53 @@
+{
+  "batch_header": {
+    "payout_batch_id": "5UXD2E8A7EBQJ",
+    "batch_status": "SUCCESS",
+    "time_created": "2026-11-06T09:00:12Z",
+    "time_completed": "2026-11-06T09:00:14Z",
+    "time_closed": "2026-11-06T09:00:14Z",
+    "sender_batch_header": {
+      "sender_batch_id": "spendproof_2026-11-06_ab12cd",
+      "email_subject": "You have a payment from Spendproof",
+      "email_message": "Paid by Spendproof under a verified rule."
+    },
+    "funding_source": "BALANCE",
+    "amount": { "currency": "USD", "value": "50.00" },
+    "fees": { "currency": "USD", "value": "0.25" }
+  },
+  "items": [
+    {
+      "payout_item_id": "8AELMXH8UB2P8",
+      "transaction_id": "0C413693MN970190K",
+      "activity_id": "0E158638XS0329106",
+      "transaction_status": "SUCCESS",
+      "payout_item_fee": { "currency": "USD", "value": "0.25" },
+      "payout_batch_id": "5UXD2E8A7EBQJ",
+      "payout_item": {
+        "recipient_type": "EMAIL",
+        "amount": { "currency": "USD", "value": "50.00" },
+        "note": "Groceries — rules version rv_0000000000",
+        "receiver": "sam.okafor.flat@example.com",
+        "sender_item_id": "sp_1",
+        "recipient_wallet": "PAYPAL",
+        "purpose": "GOODS"
+      },
+      "time_processed": "2026-11-06T09:00:14Z",
+      "links": [
+        {
+          "href": "https://api-m.sandbox.paypal.com/v1/payments/payouts-item/8AELMXH8UB2P8",
+          "rel": "item",
+          "method": "GET",
+          "encType": "application/json"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "href": "https://api-m.sandbox.paypal.com/v1/payments/payouts/5UXD2E8A7EBQJ?page_size=1000&page=1",
+      "rel": "self",
+      "method": "GET",
+      "encType": "application/json"
+    }
+  ]
+}

@@ -1,9 +1,9 @@
-import { formatDate, monthName, monthOf, type IsoDate } from "@/lib/calendar";
+import { firstOfMonth, formatDate, monthName, monthOf, type IsoDate } from "@/lib/calendar";
 import { formatMoney, type Cents } from "@/lib/money";
 import { ruleTitle } from "./english";
 import { buildMonthPlan, type HistoryEntry } from "./plan";
 import { capsFor, type CapRuleT, type Ruleset } from "./rules";
-import { decide, initialState } from "./simulate";
+import { decide, type MonthState } from "./simulate";
 
 /**
  * The gatekeeper. Deterministic code — not the AI — that stands between every
@@ -141,7 +141,8 @@ export function evaluatePayout(req: PayoutRequest, ctx: GateContext): Verdict {
   if (req.ruleId) {
     const rule = ruleset.rules.find((r) => r.id === req.ruleId);
     const title = rule ? ruleTitle(ruleset, rule) : req.ruleId;
-    const plan = buildMonthPlan(ruleset, month, req.date, ctx.history);
+    // The whole month's plan; the actual history decides what is already paid.
+    const plan = buildMonthPlan(ruleset, month, firstOfMonth(month));
     const inst = plan.instances.find((i) => i.key === instanceKey);
     if (!rule || !inst) {
       v({ code: "not_due", severity: "block", ruleId: req.ruleId, ruleTitle: title, message: `Nothing is due under this rule on ${formatDate(req.date, { year: true })}.` });
@@ -158,15 +159,25 @@ export function evaluatePayout(req: PayoutRequest, ctx: GateContext): Verdict {
       if (inst.kind === "extra" && !ctx.events.has(inst.key)) {
         v({ code: "no_event", severity: "block", ruleId: rule.id, ruleTitle: title, message: `No "${rule.kind === "extra" ? rule.trigger : "event"}" was reported for ${formatDate(req.date)}.` });
       }
-      // The simulator's own decision, on the actual month-to-date history
-      // (including anything already sent today).
-      const state = initialState(plan);
+      // The simulator's own decision for this instance, on the actual month's
+      // history: everything already sent this month counts, and only the fixed
+      // payments still unpaid after this one are reserved. (In normal running
+      // this is exactly the simulator's state; it also stays right for retries.)
+      const paidKeys = new Set(ctx.history.map((h) => h.instanceKey).filter(Boolean));
+      const state: MonthState = { paidByCap: {}, extraCount: {} };
+      for (const cap of plan.caps) state.paidByCap[cap.id] = 0;
       for (const h of monthHistory) {
-        if (h.date !== req.date) continue;
+        if (h.instanceKey === instanceKey) continue;
         for (const c of capsFor(ruleset, h.recipientId)) state.paidByCap[c.id] = (state.paidByCap[c.id] ?? 0) + h.amountCents;
         if (h.ruleId) state.extraCount[h.ruleId] = (state.extraCount[h.ruleId] ?? 0) + 1;
       }
-      const d = decide(ruleset, inst, state, true, true);
+      const fixedAfter: Record<string, Cents> = {};
+      for (const cap of plan.caps) {
+        fixedAfter[cap.id] = plan.instances
+          .filter((j) => j.idx > inst.idx && j.fixed && j.capIds.includes(cap.id) && !paidKeys.has(j.key))
+          .reduce((sum, j) => sum + j.amountCents, 0);
+      }
+      const d = decide(ruleset, { ...inst, fixedAfter }, state, true, true);
       if (d.outcome === "over_limit") {
         v({ code: "extra_limit", severity: "block", ruleId: rule.id, ruleTitle: title, message: `Already paid the maximum ${inst.maxPerMonth} times in ${monthName(month)}.` });
       } else if (d.outcome === "skipped") {
