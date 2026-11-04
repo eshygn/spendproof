@@ -10,8 +10,10 @@ import {
   AuthoringInput,
   ProposePaymentInput,
   type AuthoringInputT,
+  type Contact,
   type ProposePaymentInputT,
 } from "@/domain/authoring";
+import { withContactEmails } from "@/domain/demo";
 import { formatMoney } from "@/lib/money";
 import { db } from "../db";
 
@@ -46,14 +48,19 @@ export function configuredModel(): string {
 }
 
 export function aiStatus(): AiStatus {
-  return (
-    globalThis.__spendproofAiStatus ?? {
-      mode: process.env.GOOGLE_GENERATIVE_AI_API_KEY ? "live" : "recorded",
-      model: process.env.GOOGLE_GENERATIVE_AI_API_KEY ? configuredModel() : null,
-      reason: process.env.GOOGLE_GENERATIVE_AI_API_KEY ? "Ready" : "No GOOGLE_GENERATIVE_AI_API_KEY — using recorded responses",
-      at: null,
-    }
-  );
+  if (globalThis.__spendproofAiStatus) return globalThis.__spendproofAiStatus;
+  const forced = process.env.SPENDPROOF_FORCE_MOCK === "1";
+  const live = !!process.env.GOOGLE_GENERATIVE_AI_API_KEY && !forced;
+  return {
+    mode: live ? "live" : "recorded",
+    model: live ? configuredModel() : null,
+    reason: live
+      ? "Ready"
+      : forced
+        ? "Mock mode forced by SPENDPROOF_FORCE_MOCK — using recorded responses"
+        : "No GOOGLE_GENERATIVE_AI_API_KEY — using recorded responses",
+    at: null,
+  };
 }
 
 function setStatus(s: Omit<AiStatus, "at">) {
@@ -88,6 +95,7 @@ type Attempt<T> = { ok: true; value: T; model: string } | { ok: false; reason: s
 /** Try the configured model, then the fallback model on overload. */
 async function callModel<T>(run: (model: string) => Promise<T>): Promise<Attempt<T>> {
   const key = process.env.GOOGLE_GENERATIVE_AI_API_KEY;
+  if (process.env.SPENDPROOF_FORCE_MOCK === "1") return { ok: false, reason: "Mock mode forced by SPENDPROOF_FORCE_MOCK — using recorded responses" };
   if (!key) return { ok: false, reason: "No GOOGLE_GENERATIVE_AI_API_KEY — using recorded responses" };
   if (!takeRateToken()) return { ok: false, reason: `Rate limit (${RATE_LIMIT_PER_MINUTE}/min) reached — using recorded responses` };
   const models = [...new Set([configuredModel(), FALLBACK_MODEL])];
@@ -141,6 +149,7 @@ export async function authorRules(text: string): Promise<AuthoringResult> {
   const key = cacheKey("author", model, text);
   const cached = cacheGet<{ input: AuthoringInputT; model: string }>(key);
   if (cached?.input) {
+    setStatus({ mode: "live", model: cached.model, reason: `Cached response from ${cached.model}` });
     return { input: AuthoringInput.parse(cached.input), source: "cache", model: cached.model, note: `Cached response from ${cached.model}` };
   }
 
@@ -187,16 +196,23 @@ export interface AgentResult {
   note: string;
 }
 
-function recordedAgent(messageId: string | null, raw: string): Omit<AgentResult, "source" | "model" | "note"> | null {
+function recordedAgent(messageId: string | null): Omit<AgentResult, "source" | "model" | "note"> | null {
   const hit = recorded.agent.find((a) => a.messageId === messageId);
   if (!hit) return null;
-  void raw;
-  return { proposals: hit.toolCalls.map((c) => ProposePaymentInput.parse(c.input)), reply: hit.text };
+  // Recorded against the default demo addresses; follow any sandbox overrides.
+  const contacts = db().prepare("SELECT id, name, email, role FROM contacts").all() as Contact[];
+  return {
+    proposals: hit.toolCalls.map((c) =>
+      ProposePaymentInput.parse({ ...c.input, payeePaypalEmail: withContactEmails(c.input.payeePaypalEmail, contacts) }),
+    ),
+    reply: hit.text,
+  };
 }
 
 export async function readMessage(raw: string, messageId: string | null): Promise<AgentResult> {
   const key = cacheKey("agent", configuredModel(), raw);
   const cached = cacheGet<Omit<AgentResult, "source" | "note">>(key);
+  if (cached?.proposals) setStatus({ mode: "live", model: cached.model, reason: `Cached response from ${cached.model}` });
   if (cached?.proposals) return { ...cached, source: "cache", note: `Cached response from ${cached.model}` };
 
   const attempt = await callModel(async (m) => {
@@ -233,7 +249,7 @@ export async function readMessage(raw: string, messageId: string | null): Promis
     return { ...attempt.value, source: "live", model: attempt.model, note: `Read by ${attempt.model}` };
   }
   setStatus({ mode: "recorded", model: null, reason: attempt.reason });
-  const fallback = recordedAgent(messageId, raw);
+  const fallback = recordedAgent(messageId);
   if (!fallback) {
     throw new AiUnavailableError(`${attempt.reason}. Only the sample messages have recorded responses.`);
   }

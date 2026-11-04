@@ -22,6 +22,25 @@ export const DEMO_CONTACTS: Contact[] = [
   { id: "harbour", name: "Harbour Lane Lettings", email: "accounts@harbourlane-lettings.example.com", role: "Letting agent" },
 ];
 
+/**
+ * Optional real sandbox receivers (personal sandbox accounts), so payouts end
+ * SUCCESS instead of UNCLAIMED. Applied when the demo is seeded.
+ */
+export function contactsWithOverrides(env: Record<string, string | undefined> = process.env): Contact[] {
+  const over: Record<string, string | undefined> = { sam: env.SANDBOX_RECEIVER_SAM, ava: env.SANDBOX_RECEIVER_AVA };
+  return DEMO_CONTACTS.map((c) => (over[c.id]?.trim() ? { ...c, email: over[c.id]!.trim() } : c));
+}
+
+/** Swap the default demo addresses for the overrides in any text. */
+export function withContactEmails(text: string, contacts: readonly Contact[]): string {
+  let out = text;
+  for (const d of DEMO_CONTACTS) {
+    const c = contacts.find((x) => x.id === d.id);
+    if (c && c.email !== d.email) out = out.split(d.email).join(c.email);
+  }
+  return out;
+}
+
 /** The rules the authoring step produces from DEMO_PROMPT: the recorded tool call, converted. */
 export const DEMO_RULESET: Ruleset = toRuleset(AuthoringInput.parse(recorded.author[0].output), DEMO_CONTACTS).ruleset;
 
