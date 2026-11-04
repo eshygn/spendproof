@@ -1,0 +1,6 @@
+{
+  "name": "INSUFFICIENT_FUNDS",
+  "message": "Sender does not have sufficient funds. Please add funds and retry.",
+  "debug_id": "9de0a086d00cd",
+  "information_link": "https://developer.paypal.com/docs/api/payments.payouts-batch/#errors"
+}

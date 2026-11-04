@@ -1,0 +1,35 @@
+# Render Blueprint: one Node web service on the free plan.
+# The free plan sleeps when idle; the first request can take about a minute to wake it.
+# Its SQLite file lives on the ephemeral disk and is re-seeded on every boot, which is
+# exactly what a demo wants.
+services:
+  - type: web
+    name: spendproof
+    runtime: node
+    plan: free
+    region: oregon
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/state
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: NEXT_TELEMETRY_DISABLED
+        value: "1"
+      - key: DATABASE_PATH
+        value: /tmp/spendproof.db
+      - key: PAYPAL_CLIENT_ID
+        sync: false
+      - key: PAYPAL_CLIENT_SECRET
+        sync: false
+      - key: PAYPAL_SANDBOX_BUYER_EMAIL
+        sync: false
+      - key: SANDBOX_RECEIVER_SAM
+        sync: false
+      - key: SANDBOX_RECEIVER_AVA
+        sync: false
+      - key: GOOGLE_GENERATIVE_AI_API_KEY
+        sync: false
+      - key: AI_MODEL
+        sync: false
