@@ -73,7 +73,7 @@ export function PayoutsPanel({ state, run, busy }: { state: Snapshot; run: Run; 
                   const errName = Array.isArray(err) ? err[0]?.name : err?.name;
                   return (
                     <tr key={p.id}>
-                      <td className="mono small">{formatDate(p.date, { weekday: true })}</td>
+                      <td className="mono small nw">{formatDate(p.date, { weekday: true })}</td>
                       <td>
                         <div style={{ fontWeight: 600 }}>{p.recipientName}</div>
                         <div className="tiny muted mono">{p.receiver}</div>
@@ -82,7 +82,7 @@ export function PayoutsPanel({ state, run, busy }: { state: Snapshot; run: Run; 
                         {title(p.ruleId)}
                         {p.retryOf ? <span className="pill accent" style={{ marginLeft: 6 }}>retry</span> : null}
                       </td>
-                      <td className="r money">{formatMoney(p.amountCents)}</td>
+                      <td className="r money nw">{formatMoney(p.amountCents)}</td>
                       <td>
                         <StatusPill status={p.status} />
                         {errName ? <div className="tiny" style={{ color: "var(--breach)", marginTop: 3 }}>{errName}</div> : null}

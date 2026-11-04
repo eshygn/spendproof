@@ -75,13 +75,12 @@ export function ProofPanel({ state, run, busy, onActivated }: { state: Snapshot;
         </div>
         <div className="card-b stack">
           {report.verdict === "counterexample" && report.failure ? (
-            <Counterexample report={report} rs={rs} clock={state.clock} />
+            <Counterexample report={report} rs={rs} clock={state.clock} chart={<MonthChart report={report} />} />
           ) : report.verdict === "verified" ? (
-            <Verified report={report} rs={rs} />
+            <Verified report={report} rs={rs} chart={<MonthChart report={report} />} />
           ) : (
             <div className="callout bad">Z3 could not decide within its time limit, so these rules are not verified and cannot go live.</div>
           )}
-          <MonthChart report={report} />
           <div className="stats">
             <span><b>{report.stats.checks}</b> Z3 checks</span>
             <span><b>{report.stats.booleans}</b> free Booleans</span>
@@ -129,14 +128,17 @@ function Explainer() {
   );
 }
 
-function Counterexample({ report, rs, clock }: { report: VerifyReport; rs: Ruleset; clock: string }) {
+function Counterexample({ report, rs, clock, chart }: { report: VerifyReport; rs: Ruleset; clock: string; chart: React.ReactNode }) {
   const f = report.failure!;
   const cx = f.counterexample;
   const title = (id: string) => {
     const r = rs.rules.find((x) => x.id === id);
     return r ? ruleTitle(rs, r) : id;
   };
-  const name = (rid: string) => rs.recipients.find((r) => r.id === rid)?.name.split(" ")[0] ?? rid;
+  const trigger = (id: string) => {
+    const r = rs.rules.find((x) => x.id === id);
+    return r?.kind === "extra" ? r.trigger : id;
+  };
   const firstOver = cx.steps.findIndex((s) => s.runningCents > cx.limitCents);
   const refused = cx.refusedGuaranteed[0];
   const daysEarly = refused ? dayNumber(refused.date) - dayNumber(clock) : null;
@@ -151,6 +153,7 @@ function Counterexample({ report, rs, clock }: { report: VerifyReport; rs: Rules
             : <>A guaranteed payment would be refused on {formatDate(cx.property.date, { weekday: true })}.</>}
         </span>
       </div>
+      {chart}
 
       <div className="cx" role="table" aria-label={`Counterexample for ${monthName(f.month)}`}>
         <div className="cx-row head" role="row"><span>Date</span><span>Payment</span><span className="r">Amount</span><span className="r">Month total</span></div>
@@ -158,7 +161,7 @@ function Counterexample({ report, rs, clock }: { report: VerifyReport; rs: Rules
           <div key={s.key} role="row" className={`cx-row ${s.kind === "extra" ? "event" : ""} ${i === firstOver || i === cx.steps.length - 1 && s.runningCents > cx.limitCents ? "over" : ""}`}>
             <span className="mono small">{formatDate(s.date, { weekday: true })}</span>
             <span className={s.outcome !== "paid" ? "skipped" : ""}>
-              {s.kind === "extra" ? <><span className="pill hold">event</span> {name(s.recipientId)}: “{rs.rules.find((r) => r.id === s.ruleId && r.kind === "extra")?.kind === "extra" ? (rs.rules.find((r) => r.id === s.ruleId) as { trigger: string }).trigger : "event"}”</> : title(s.ruleId)}
+              {s.kind === "extra" ? <><span className="pill hold">event</span> {trigger(s.ruleId)} · {title(s.ruleId)}</> : title(s.ruleId)}
             </span>
             <span className="r money small">{formatMoney(s.amountCents, { currency: false })}</span>
             <span className="r money small run">{formatMoney(s.runningCents, { currency: false })}</span>
@@ -187,7 +190,7 @@ function Counterexample({ report, rs, clock }: { report: VerifyReport; rs: Rules
   );
 }
 
-function Verified({ report, rs }: { report: VerifyReport; rs: Ruleset }) {
+function Verified({ report, rs, chart }: { report: VerifyReport; rs: Ruleset; chart: React.ReactNode }) {
   const title = (id: string) => {
     const r = rs.rules.find((x) => x.id === id);
     return r ? ruleTitle(rs, r) : id;
@@ -199,6 +202,7 @@ function Verified({ report, rs }: { report: VerifyReport; rs: Ruleset }) {
         <span className="big">Verified for all {report.horizon.months} months</span>
         <span className="sub">Z3 returned unsat for every property in every month.</span>
       </div>
+      {chart}
       <div className="props">
         {report.properties.map((p) => (
           <div key={p.id} className="prop">
@@ -223,8 +227,8 @@ function MonthChart({ report }: { report: VerifyReport }) {
   if (!capId) return null;
   const rows = report.months.map((m) => ({ m, c: m.caps.find((c) => c.capId === capId)! }));
   const limit = rows[0]?.c.limitCents ?? 0;
-  const max = Math.max(limit, ...rows.map((r) => r.c.worstCaseCents)) * 1.08;
-  const W = 720, H = 170, top = 22, bottom = 22, plot = H - top - bottom;
+  const max = Math.max(limit, ...rows.map((r) => r.c.worstCaseCents)) * 1.04;
+  const W = 560, H = 176, top = 14, bottom = 24, plot = H - top - bottom;
   const slot = W / rows.length;
   const y = (cents: number) => top + plot - (cents / max) * plot;
   return (
@@ -237,25 +241,25 @@ function MonthChart({ report }: { report: VerifyReport }) {
       <svg viewBox={`0 0 ${W} ${H}`} width="100%" role="img" aria-label="Worst-case total per month against the cap" style={{ display: "block", marginTop: 6 }}>
         {rows.map(({ m, c }, i) => {
           const broken = c.status === "broken";
-          const x = i * slot + slot * 0.18;
-          const w = slot * 0.64;
+          const x = i * slot + slot * 0.1;
+          const w = slot * 0.8;
           const focus = report.failure?.month === m.month;
           return (
             <g key={m.month}>
               <title>{`${m.label}: worst case ${formatMoney(c.worstCaseCents)}${m.sameShapeAs ? " (proof shared with a month of the same shape)" : ""}`}</title>
               <rect x={x} y={y(c.worstCaseCents)} width={w} height={Math.max(2, top + plot - y(c.worstCaseCents))} rx={5}
                 style={{ fill: broken ? "var(--breach-2)" : "color-mix(in srgb, var(--proof) 72%, var(--card))", transition: "all .5s" }} />
-              <text x={x + w / 2} y={y(c.worstCaseCents) - 6} textAnchor="middle" className="mono"
-                style={{ fontSize: 11, fill: broken ? "var(--breach)" : "var(--ink-2)", fontWeight: broken ? 700 : 400 }}>
+              <text x={x + w / 2} y={y(c.worstCaseCents) + 15} textAnchor="middle" className="mono"
+                style={{ fontSize: 11, fill: "#fff", fontWeight: 700 }}>
                 {formatMoney(c.worstCaseCents, { compact: true, currency: false })}
               </text>
-              <text x={x + w / 2} y={H - 6} textAnchor="middle" style={{ fontSize: 11, fill: focus ? "var(--ink)" : "var(--ink-3)", fontWeight: focus ? 700 : 400 }}>
+              <text x={x + w / 2} y={H - 7} textAnchor="middle" style={{ fontSize: 11.5, fill: focus ? "var(--ink)" : "var(--ink-3)", fontWeight: focus ? 700 : 400 }}>
                 {monthName(m.month, true)}
               </text>
             </g>
           );
         })}
-        <line x1={0} x2={W} y1={y(limit)} y2={y(limit)} strokeDasharray="6 5" strokeWidth={1.6} style={{ stroke: "var(--ink)", opacity: 0.6 }} />
+        <line x1={0} x2={W} y1={y(limit)} y2={y(limit)} strokeDasharray="5 4" strokeWidth={1.6} style={{ stroke: "var(--ink)", opacity: 0.75 }} />
       </svg>
     </div>
   );

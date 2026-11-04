@@ -12,6 +12,7 @@ import {
   type AuthoringInputT,
   type ProposePaymentInputT,
 } from "@/domain/authoring";
+import { formatMoney } from "@/lib/money";
 import { db } from "../db";
 
 /**
@@ -96,9 +97,14 @@ async function callModel<T>(run: (model: string) => Promise<T>): Promise<Attempt
       return { ok: true, value: await run(model), model };
     } catch (e) {
       const status = APICallError.isInstance(e) ? e.statusCode : undefined;
-      if (status === 429) return { ok: false, reason: `Gemini rate-limited (429) — using recorded responses` };
-      reason = status === 503 ? `${model} overloaded (503)` : `${model}: ${(e as Error).message.slice(0, 120)}`;
-      if (status !== 503 && status !== 404) break;
+      reason =
+        status === 429
+          ? "Gemini rate-limited (429)"
+          : status === 503
+            ? `${model} overloaded (503)`
+            : `${model}: ${(e as Error).message.slice(0, 120)}`;
+      // Quotas and capacity are per model: try the fallback model before giving up.
+      if (status === undefined || ![400, 404, 429, 500, 503].includes(status)) break;
     }
   }
   return { ok: false, reason: `${reason} — using recorded responses` };
@@ -106,6 +112,13 @@ async function callModel<T>(run: (model: string) => Promise<T>): Promise<Attempt
 
 function google() {
   return createGoogleGenerativeAI({ apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY });
+}
+
+/** Tool-filling needs little reasoning: keep latency low on thinking models. */
+function thinking(model: string) {
+  return {
+    google: /gemini-2\./.test(model) ? { thinkingConfig: { thinkingBudget: 0 } } : { thinkingConfig: { thinkingLevel: "low" as const } },
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -126,8 +139,10 @@ function recordedAuthoring(text: string): AuthoringInputT | null {
 export async function authorRules(text: string): Promise<AuthoringResult> {
   const model = configuredModel();
   const key = cacheKey("author", model, text);
-  const cached = cacheGet<AuthoringInputT>(key);
-  if (cached) return { input: AuthoringInput.parse(cached), source: "cache", model, note: "Cached model response" };
+  const cached = cacheGet<{ input: AuthoringInputT; model: string }>(key);
+  if (cached?.input) {
+    return { input: AuthoringInput.parse(cached.input), source: "cache", model: cached.model, note: `Cached response from ${cached.model}` };
+  }
 
   const attempt = await callModel(async (m) => {
     const res = await generateText({
@@ -136,7 +151,9 @@ export async function authorRules(text: string): Promise<AuthoringResult> {
       prompt: text,
       tools: { record_rules: tool({ description: AUTHORING_TOOL_DESCRIPTION, inputSchema: AuthoringInput }) },
       toolChoice: { type: "tool", toolName: "record_rules" },
-      maxRetries: 1,
+      providerOptions: thinking(m),
+      maxRetries: 0,
+      timeout: 25_000,
       temperature: 0,
     });
     const call = res.toolCalls.find((c) => c.toolName === "record_rules");
@@ -145,7 +162,7 @@ export async function authorRules(text: string): Promise<AuthoringResult> {
   });
 
   if (attempt.ok) {
-    cachePut(key, attempt.value);
+    cachePut(key, { input: attempt.value, model: attempt.model });
     setStatus({ mode: "live", model: attempt.model, reason: `Live: ${attempt.model}` });
     return { input: attempt.value, source: "live", model: attempt.model, note: `Parsed by ${attempt.model}` };
   }
@@ -178,10 +195,9 @@ function recordedAgent(messageId: string | null, raw: string): Omit<AgentResult,
 }
 
 export async function readMessage(raw: string, messageId: string | null): Promise<AgentResult> {
-  const model = configuredModel();
-  const key = cacheKey("agent", model, raw);
-  const cached = cacheGet<Omit<AgentResult, "source" | "model" | "note">>(key);
-  if (cached) return { ...cached, source: "cache", model, note: "Cached model response" };
+  const key = cacheKey("agent", configuredModel(), raw);
+  const cached = cacheGet<Omit<AgentResult, "source" | "note">>(key);
+  if (cached?.proposals) return { ...cached, source: "cache", note: `Cached response from ${cached.model}` };
 
   const attempt = await callModel(async (m) => {
     const res = await generateText({
@@ -195,7 +211,9 @@ export async function readMessage(raw: string, messageId: string | null): Promis
         }),
       },
       toolChoice: "auto",
-      maxRetries: 1,
+      providerOptions: thinking(m),
+      maxRetries: 0,
+      timeout: 25_000,
       temperature: 0,
     });
     const proposals = res.toolCalls
@@ -204,13 +222,13 @@ export async function readMessage(raw: string, messageId: string | null): Promis
     const reply =
       res.text.trim() ||
       (proposals.length
-        ? `I've proposed ${proposals.length === 1 ? "a payment" : `${proposals.length} payments`} from this message.`
+        ? proposals.map((p) => `I've proposed paying ${p.payeeName} ${formatMoney(p.amountCents)}: ${p.reason}`).join(" ")
         : "I didn't find a payment request in this message.");
     return { proposals, reply };
   });
 
   if (attempt.ok) {
-    cachePut(key, attempt.value);
+    cachePut(key, { ...attempt.value, model: attempt.model });
     setStatus({ mode: "live", model: attempt.model, reason: `Live: ${attempt.model}` });
     return { ...attempt.value, source: "live", model: attempt.model, note: `Read by ${attempt.model}` };
   }

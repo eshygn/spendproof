@@ -311,14 +311,14 @@ async function capCheck(
   return { status: "broken", events: trueEvents(Z, s.model(), plan, enc) };
 }
 
-async function worstCase(Z: Z3Ctx, ruleset: Ruleset, plan: MonthPlan, cap: CapRuleT, counter: Counter) {
+async function worstCase(Z: Z3Ctx, ruleset: Ruleset, plan: MonthPlan, cap: CapRuleT, counter: Counter, fewestEvents = false) {
   const o = new Z.Optimize();
   o.set("timeout", TIMEOUT_MS);
   const enc = encodeMonth(Z, ruleset, plan, { enforce: false });
   o.add(...enc.facts);
   o.maximize(enc.totals[cap.id]);
   const evs = [...enc.events.values()];
-  if (evs.length) o.minimize(Z.Sum(Z.If(evs[0], 1, 0), ...evs.slice(1).map((e) => Z.If(e, 1, 0))));
+  if (fewestEvents && evs.length) o.minimize(Z.Sum(Z.If(evs[0], 1, 0), ...evs.slice(1).map((e) => Z.If(e, 1, 0))));
   counter.checks++;
   const r = await o.check();
   if (r !== "sat") return null;
@@ -479,12 +479,13 @@ export async function verify(Z: Z3Ctx, input: VerifyInput): Promise<VerifyReport
       const brokenRules: string[] = [];
       for (const cap of caps) {
         const res = await capCheck(Z, ruleset, plan, cap, counter);
-        const worst = await worstCase(Z, ruleset, plan, cap, counter);
+        let worst = await worstCase(Z, ruleset, plan, cap, counter);
         capResults.push({ capId: cap.id, limitCents: cap.limitCents, worstCaseCents: worst?.total ?? 0, status: res.status });
         if (res.status !== "broken") continue;
         brokenRules.push(cap.id);
         if (!failure) {
-          // Tell the story with the worst case (highest total) when Optimize found one.
+          // Tell the story with the worst case (highest total, then fewest events).
+          worst = (await worstCase(Z, ruleset, plan, cap, counter, true)) ?? worst;
           const pick = worst && worst.total > cap.limitCents ? worst.events : res.events;
           const breaks = (sim: MonthSimulation) => (sim.totals[cap.id] ?? 0) > cap.limitCents;
           const { sim, events } = replay(ruleset, plan, pick, breaks, false);

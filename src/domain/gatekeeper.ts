@@ -72,9 +72,7 @@ export interface Verdict {
 
 const money = (c: Cents) => formatMoney(c);
 
-export function countsTowardHistory(status: string): boolean {
-  return !["failed", "returned", "blocked", "denied", "refunded", "reversed"].includes(status);
-}
+export { countsAsSpent as countsTowardHistory } from "./payoutStatus";
 
 export function evaluatePayout(req: PayoutRequest, ctx: GateContext): Verdict {
   const { ruleset } = ctx;
@@ -121,17 +119,6 @@ export function evaluatePayout(req: PayoutRequest, ctx: GateContext): Verdict {
       message: `${req.recipientName} <${req.recipientEmail}> is not an approved recipient.`,
     });
   } else passed.push(`${recipient.name} is an approved recipient`);
-
-  // 2. Funded balance.
-  if (req.amountCents > ctx.balanceCents) {
-    v({
-      code: "balance",
-      severity: "block",
-      ruleId: null,
-      ruleTitle: "Funded balance",
-      message: `${money(req.amountCents)} is more than the funded balance of ${money(ctx.balanceCents)}.`,
-    });
-  } else passed.push(`Funded balance covers ${money(req.amountCents)}`);
 
   const month = monthOf(req.date);
   const monthHistory = ctx.history.filter((h) => monthOf(h.date) === month);
@@ -240,6 +227,20 @@ export function evaluatePayout(req: PayoutRequest, ctx: GateContext): Verdict {
         });
       }
     }
+  }
+
+  // Last, a system check rather than a rule: the funded balance must cover it.
+  // Only reported when the rules themselves would allow the payment.
+  if (!violations.some((x) => x.severity === "block")) {
+    if (req.amountCents > ctx.balanceCents) {
+      v({
+        code: "balance",
+        severity: "block",
+        ruleId: null,
+        ruleTitle: "Funded balance",
+        message: `${money(req.amountCents)} is more than the funded balance of ${money(ctx.balanceCents)}. Top up through PayPal.`,
+      });
+    } else passed.push(`Funded balance covers ${money(req.amountCents)}`);
   }
 
   const decision = violations.some((x) => x.severity === "block")

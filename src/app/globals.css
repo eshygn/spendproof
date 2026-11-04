@@ -129,6 +129,7 @@ a { color: var(--accent); }
 
 .tabs { display: flex; gap: 4px; padding: 4px; background: var(--paper-2); border-radius: 12px; width: fit-content; border: 1px solid var(--line); }
 .tab {
+  white-space: nowrap;
   border: 0; background: transparent; padding: 7px 14px; border-radius: 9px; cursor: pointer;
   display: inline-flex; align-items: center; gap: 8px; color: var(--ink-2); font-weight: 500;
 }
@@ -233,7 +234,7 @@ textarea.json { min-height: 280px; font-family: var(--font-mono), monospace; fon
 .capline span { position: absolute; right: 0; top: -18px; font-size: 10.5px; font-family: var(--font-mono), monospace; background: var(--card); padding: 0 4px; }
 
 .cx { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
-.cx-row { display: grid; grid-template-columns: 96px minmax(0, 1fr) 84px 92px; gap: 8px; align-items: center; padding: 6px 12px; font-size: 13px; border-top: 1px solid var(--line); }
+.cx-row { display: grid; grid-template-columns: 96px minmax(0, 1fr) 84px 92px; gap: 8px; align-items: center; padding: 5px 12px; font-size: 13px; border-top: 1px solid var(--line); }
 .cx-row:first-child { border-top: 0; }
 .cx-row.head { background: var(--paper-2); font-size: 11px; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; }
 .cx-row.event { background: color-mix(in srgb, var(--hold-bg) 70%, transparent); }
@@ -289,6 +290,7 @@ textarea.json { min-height: 280px; font-family: var(--font-mono), monospace; fon
 /* ---------- payouts ---------- */
 .table { width: 100%; border-collapse: collapse; font-size: 13px; }
 .table th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-3); font-weight: 600; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+.table td.nw { white-space: nowrap; }
 .table td { padding: 9px 10px; border-bottom: 1px solid var(--line); vertical-align: middle; }
 .table tr:last-child td { border-bottom: 0; }
 .table td.r, .table th.r { text-align: right; }
@@ -313,7 +315,7 @@ textarea.json { min-height: 280px; font-family: var(--font-mono), monospace; fon
 .feed li { display: grid; grid-template-columns: 8px minmax(0, 1fr); gap: 10px; font-size: 12.5px; color: var(--ink-2); }
 .feed li .b { width: 8px; height: 8px; border-radius: 50%; background: var(--line-2); margin-top: 5px; }
 .feed li.k-verify .b, .feed li.k-activate .b, .feed li.k-fund .b { background: var(--proof-2); }
-.feed li.k-blocked .b, .feed li.k-paypal-failed .b { background: var(--breach-2); }
+.feed li.k-blocked .b, .feed li.k-paypal-failed .b, .feed li.k-verify-fail .b { background: var(--breach-2); }
 .feed li.k-paypal .b, .feed li.k-oneoff .b { background: var(--accent); }
 .feed li.k-skip .b, .feed li.k-approval .b { background: var(--hold); }
 .feed .when { font-family: var(--font-mono), monospace; font-size: 11px; color: var(--ink-3); }

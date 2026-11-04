@@ -84,11 +84,11 @@ export function App({ initial }: { initial: Snapshot }) {
           <span className={`chip ${state.modes.ai.mode === "live" ? "live" : "mock"}`} title={state.modes.ai.reason}>
             <span className="dot" />
             AI <b>{state.modes.ai.mode === "live" ? (state.modes.ai.model ?? "Gemini") : "Recorded"}</b>
-            {state.modes.ai.mode !== "live" ? <span className="muted"> · {state.modes.ai.reason.split(" — ")[0]}</span> : null}
+            {state.modes.ai.mode !== "live" ? <span className="muted"> · {shortReason(state.modes.ai.reason)}</span> : null}
           </span>
           <span className="chip live" title="Z3 theorem prover (WebAssembly), running on the server">
             <span className="dot" />
-            Z3 <b>{state.modes.z3.version.replace(/^Z3 /i, "")}</b>
+            Z3 <b>{state.modes.z3.version}</b> <span className="muted">wasm</span>
           </span>
         </div>
       </header>
@@ -213,4 +213,11 @@ function Rail({ state, run, busy, onJump }: { state: Snapshot; run: Run; busy: s
       </section>
     </aside>
   );
+}
+
+function shortReason(reason: string): string {
+  if (/No GOOGLE_GENERATIVE_AI_API_KEY/.test(reason)) return "no API key";
+  if (/429|Rate limit/i.test(reason)) return "rate-limited";
+  if (/503|overloaded/i.test(reason)) return "model busy";
+  return "offline";
 }
