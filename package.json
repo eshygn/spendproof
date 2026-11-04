@@ -14,7 +14,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "check": "npm run lint && npm run typecheck && npm run test && npm run build",
-    "dev:mock": "SPENDPROOF_FORCE_MOCK=1 next dev"
+    "dev:mock": "SPENDPROOF_FORCE_MOCK=1 next dev",
+    "proofs:record": "tsx scripts/record-proofs.ts"
   },
   "dependencies": {
     "@ai-sdk/google": "^4.0.111",

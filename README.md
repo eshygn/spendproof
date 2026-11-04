@@ -12,7 +12,7 @@ People want an AI agent to handle money they send to others: a flatmate's grocer
 
 ## Judge quickstart
 
-**Hosted:** `https://spendproof.onrender.com` *(placeholder: replace with the deployed URL)*. It runs on Render's free plan, so the first load can take about a minute while the service wakes up. Z3 runs on a shared 0.1 CPU there, so verification is several times slower than on a laptop.
+**Hosted:** `https://spendproof.onrender.com` *(placeholder: replace with the deployed URL)*. It runs on Render's free plan, so the first load can take about a minute while the service wakes up. The free plan has only 0.1 CPU, so the hosted copy reuses stored Z3 proofs for the demo rules (labelled on screen) and runs everything else live, more slowly than on a laptop.
 
 **Local, one command, no API keys (mock mode):**
 
@@ -89,10 +89,10 @@ In the demo, the minimal core contains **four** rules: Sam's guaranteed Fridays,
 
 1. Create a **sandbox REST app** at developer.paypal.com → Apps & Credentials → Sandbox. Make sure *Payouts* is enabled for it.
 2. Get a **Gemini API key** at aistudio.google.com (the free tier is enough).
-3. `cp .env.example .env.local` and fill in `PAYPAL_CLIENT_ID`, `PAYPAL_CLIENT_SECRET` and `GOOGLE_GENERATIVE_AI_API_KEY`. Optionally set `SANDBOX_RECEIVER_SAM` / `SANDBOX_RECEIVER_AVA` to two **personal sandbox accounts** so payouts end `SUCCESS` (the fictional demo addresses have no PayPal account, so the sandbox leaves those payouts `UNCLAIMED`).
+3. `cp .env.example .env.local` and fill in `PAYPAL_CLIENT_ID`, `PAYPAL_CLIENT_SECRET` and `GOOGLE_GENERATIVE_AI_API_KEY`. Optionally set `SANDBOX_RECEIVER_SAM` / `SANDBOX_RECEIVER_AVA` to two **personal sandbox accounts from the same developer login as the REST app** (developer.paypal.com → Testing Tools → Sandbox Accounts) so payouts can end `SUCCESS`. Payouts to an address the sandbox doesn't know end `UNCLAIMED` with `RECEIVER_UNREGISTERED`; that is what the fictional demo addresses do.
 4. `npm run dev`. The chips should read **PayPal Sandbox · live** and **AI gemini-…**. To use the top-up button, log in with a sandbox *personal* account (not the business account that owns the app: PayPal refuses payments to yourself).
 
-**Render:** the repo includes `render.yaml`. Create a Blueprint from the repo and set the secret env vars in the dashboard.
+**Render:** the repo includes `render.yaml`. Create a Blueprint from the repo and set the secret env vars in the dashboard. On Render it also sets `SPENDPROOF_STORED_PROOFS=1`: the free plan has 0.1 CPU, so when the rules and start date exactly match a proof Z3 already produced (the demo rules and the repaired rules are stored in `fixtures/proofs`, and anything verified once on the server is remembered), that proof is reused and the UI says so. "Run Z3 again" always runs the solver live. Locally this is off, so you always see live Z3. `tests/proofs.test.ts` recomputes the stored proofs with live Z3 and fails if they drift.
 
 ## Scripts
 

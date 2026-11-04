@@ -10,7 +10,9 @@
 
 **Shot:** the Spendproof home screen, empty composer with the sample sentence. Slow zoom on the header.
 
-> "I want an AI to handle money I send to other people: my flatmate's grocery money, my bookkeeper's retainer. Two things stop me. Plain-English rules have edge cases nobody spots. And an AI agent holding payment credentials can be talked into paying anyone. Spendproof fixes both."
+> "I want an AI to handle money I send people: my flatmate's groceries, my bookkeeper's retainer. But plain-English rules hide edge cases, and an agent with payment credentials can be talked into paying anyone."
+
+*(About 35 words, roughly 14 seconds at a normal pace, which leaves room for the opening shot.)*
 
 ### 0:20–0:42 · Rules as data, read back from a template
 
@@ -45,7 +47,7 @@
 
 ### 2:15–2:40 · Real PayPal payouts, stamped with the rules version
 
-**Shot:** click **+4 weeks** on the demo clock. The Payouts tab: rows appear (Pending → Paid / Sent · unclaimed), each with an `rv_…` rules version and PayPal batch/item IDs. The 1 Nov row says **Failed: INSUFFICIENT_FUNDS**. Click **Retry**, and the retry row appears and goes to Pending.
+**Shot:** click **+4 weeks** on the demo clock. The Payouts tab: rows appear (Pending → Paid, or "Sent · unclaimed" if the receivers aren't sandbox accounts in your developer login), each with an `rv_…` rules version and PayPal batch/item IDs. The 1 Nov row says **Failed: INSUFFICIENT_FUNDS**. Click **Retry**, and the retry row appears and goes to Pending.
 **Captions:** [PayPal Payouts API · batch payout per day] → [Status polled from PayPal] → [PayPal refused a batch, so the gatekeeper re-checks and we retry]
 
 > "I jump the clock four weeks. The scheduler sends November through PayPal Payouts, one batch a day, and every payout is stamped with the rules version that allowed it. Statuses come straight back from PayPal. One batch was refused by PayPal, so I retry it, and the gatekeeper re-checks it against the real payment history first."

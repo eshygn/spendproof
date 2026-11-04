@@ -90,6 +90,8 @@ export interface VerifyReport {
     core: string[];
   };
   stats: { checks: number; ms: number; booleans: number; shapes: number };
+  /** Set when this report is a stored proof for the exact same input, not a fresh Z3 run. */
+  reused?: { source: "fixture" | "cache"; provedAt: string } | null;
 }
 
 export class ReplayMismatchError extends Error {}
@@ -318,7 +320,15 @@ async function worstCase(Z: Z3Ctx, ruleset: Ruleset, plan: MonthPlan, cap: CapRu
   o.add(...enc.facts);
   o.maximize(enc.totals[cap.id]);
   const evs = [...enc.events.values()];
-  if (fewestEvents && evs.length) o.minimize(Z.Sum(Z.If(evs[0], 1, 0), ...evs.slice(1).map((e) => Z.If(e, 1, 0))));
+  if (fewestEvents && evs.length) {
+    // Lexicographic: highest total, then fewest events, then earliest days. The
+    // last objective makes the counterexample unique, so the same rules always
+    // tell the same story (Z3 is otherwise free to return any violating model).
+    const day = (i: number) => Number(plan.instances[i].date.slice(8, 10));
+    const ev = [...enc.events.entries()];
+    o.minimize(Z.Sum(Z.If(ev[0][1], 1, 0), ...ev.slice(1).map(([, e]) => Z.If(e, 1, 0))));
+    o.minimize(Z.Sum(Z.If(ev[0][1], day(ev[0][0]), 0), ...ev.slice(1).map(([i, e]) => Z.If(e, day(i), 0))));
+  }
   counter.checks++;
   const r = await o.check();
   if (r !== "sat") return null;

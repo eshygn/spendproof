@@ -1,0 +1,699 @@
+{
+ "key": "pk_1390335e159965d4297acf73",
+ "provedAt": "2026-11-04T17:25:58.295Z",
+ "report": {
+  "verdict": "counterexample",
+  "horizon": {
+   "start": "2026-11-01",
+   "end": "2027-10-31",
+   "months": 12
+  },
+  "months": [
+   {
+    "month": "2026-11",
+    "label": "November 2026",
+    "from": "2026-11-01",
+    "caps": [
+     {
+      "capId": "cap-total",
+      "limitCents": 40000,
+      "worstCaseCents": 39000,
+      "status": "proved"
+     }
+    ],
+    "guarantee": "proved",
+    "guaranteedCount": 4,
+    "uncertainEvents": 30,
+    "sameShapeAs": null
+   },
+   {
+    "month": "2026-12",
+    "label": "December 2026",
+    "from": "2026-12-01",
+    "caps": [
+     {
+      "capId": "cap-total",
+      "limitCents": 40000,
+      "worstCaseCents": 39000,
+      "status": "proved"
+     }
+    ],
+    "guarantee": "proved",
+    "guaranteedCount": 4,
+    "uncertainEvents": 31,
+    "sameShapeAs": "2026-11"
+   },
+   {
+    "month": "2027-01",
+    "label": "January 2027",
+    "from": "2027-01-01",
+    "caps": [
+     {
+      "capId": "cap-total",
+      "limitCents": 40000,
+      "worstCaseCents": 44000,
+      "status": "broken"
+     }
+    ],
+    "guarantee": "broken",
+    "guaranteedCount": 5,
+    "uncertainEvents": 31,
+    "sameShapeAs": null
+   },
+   {
+    "month": "2027-02",
+    "label": "February 2027",
+    "from": "2027-02-01",
+    "caps": [
+     {
+      "capId": "cap-total",
+      "limitCents": 40000,
+      "worstCaseCents": 39000,
+      "status": "proved"
+     }
+    ],
+    "guarantee": "proved",
+    "guaranteedCount": 4,
+    "uncertainEvents": 28,
+    "sameShapeAs": "2026-11"
+   },
+   {
+    "month": "2027-03",
+    "label": "March 2027",
+    "from": "2027-03-01",
+    "caps": [
+     {
+      "capId": "cap-total",
+      "limitCents": 40000,
+      "worstCaseCents": 39000,
+      "status": "proved"
+     }
+    ],
+    "guarantee": "proved",
+    "guaranteedCount": 4,
+    "uncertainEvents": 31,
+    "sameShapeAs": "2026-11"
+   },
+   {
+    "month": "2027-04",
+    "label": "April 2027",
+    "from": "2027-04-01",
+    "caps": [
+     {
+      "capId": "cap-total",
+      "limitCents": 40000,
+      "worstCaseCents": 44000,
+      "status": "broken"
+     }
+    ],
+    "guarantee": "broken",
+    "guaranteedCount": 5,
+    "uncertainEvents": 30,
+    "sameShapeAs": null
+   },
+   {
+    "month": "2027-05",
+    "label": "May 2027",
+    "from": "2027-05-01",
+    "caps": [
+     {
+      "capId": "cap-total",
+      "limitCents": 40000,
+      "worstCaseCents": 39000,
+      "status": "proved"
+     }
+    ],
+    "guarantee": "proved",
+    "guaranteedCount": 4,
+    "uncertainEvents": 31,
+    "sameShapeAs": "2026-11"
+   },
+   {
+    "month": "2027-06",
+    "label": "June 2027",
+    "from": "2027-06-01",
+    "caps": [
+     {
+      "capId": "cap-total",
+      "limitCents": 40000,
+      "worstCaseCents": 39000,
+      "status": "proved"
+     }
+    ],
+    "guarantee": "proved",
+    "guaranteedCount": 4,
+    "uncertainEvents": 30,
+    "sameShapeAs": "2026-11"
+   },
+   {
+    "month": "2027-07",
+    "label": "July 2027",
+    "from": "2027-07-01",
+    "caps": [
+     {
+      "capId": "cap-total",
+      "limitCents": 40000,
+      "worstCaseCents": 44000,
+      "status": "broken"
+     }
+    ],
+    "guarantee": "broken",
+    "guaranteedCount": 5,
+    "uncertainEvents": 31,
+    "sameShapeAs": null
+   },
+   {
+    "month": "2027-08",
+    "label": "August 2027",
+    "from": "2027-08-01",
+    "caps": [
+     {
+      "capId": "cap-total",
+      "limitCents": 40000,
+      "worstCaseCents": 39000,
+      "status": "proved"
+     }
+    ],
+    "guarantee": "proved",
+    "guaranteedCount": 4,
+    "uncertainEvents": 31,
+    "sameShapeAs": "2026-11"
+   },
+   {
+    "month": "2027-09",
+    "label": "September 2027",
+    "from": "2027-09-01",
+    "caps": [
+     {
+      "capId": "cap-total",
+      "limitCents": 40000,
+      "worstCaseCents": 39000,
+      "status": "proved"
+     }
+    ],
+    "guarantee": "proved",
+    "guaranteedCount": 4,
+    "uncertainEvents": 30,
+    "sameShapeAs": null
+   },
+   {
+    "month": "2027-10",
+    "label": "October 2027",
+    "from": "2027-10-01",
+    "caps": [
+     {
+      "capId": "cap-total",
+      "limitCents": 40000,
+      "worstCaseCents": 44000,
+      "status": "broken"
+     }
+    ],
+    "guarantee": "broken",
+    "guaranteedCount": 5,
+    "uncertainEvents": 31,
+    "sameShapeAs": "2027-01"
+   }
+  ],
+  "properties": [
+   {
+    "id": "cap:cap-total",
+    "kind": "cap",
+    "ruleId": "cap-total",
+    "status": "broken",
+    "firstBrokenMonth": "2027-01"
+   },
+   {
+    "id": "guarantee:sam-groceries",
+    "kind": "guarantee",
+    "ruleId": "sam-groceries",
+    "status": "broken",
+    "firstBrokenMonth": "2027-01"
+   }
+  ],
+  "failure": {
+   "month": "2027-01",
+   "counterexample": {
+    "month": "2027-01",
+    "property": {
+     "kind": "cap",
+     "capId": "cap-total"
+    },
+    "events": [
+     {
+      "key": "sam-big-shop@2027-01-01",
+      "ruleId": "sam-big-shop",
+      "date": "2027-01-01"
+     },
+     {
+      "key": "sam-big-shop@2027-01-02",
+      "ruleId": "sam-big-shop",
+      "date": "2027-01-02"
+     }
+    ],
+    "steps": [
+     {
+      "key": "sam-groceries@2027-01-01",
+      "date": "2027-01-01",
+      "ruleId": "sam-groceries",
+      "recipientId": "sam",
+      "kind": "recurring",
+      "amountCents": 5000,
+      "outcome": "paid",
+      "runningCents": 5000
+     },
+     {
+      "key": "ava-day-1@2027-01-01",
+      "date": "2027-01-01",
+      "ruleId": "ava-day-1",
+      "recipientId": "ava",
+      "kind": "recurring",
+      "amountCents": 15000,
+      "outcome": "paid",
+      "runningCents": 20000
+     },
+     {
+      "key": "sam-big-shop@2027-01-01",
+      "date": "2027-01-01",
+      "ruleId": "sam-big-shop",
+      "recipientId": "sam",
+      "kind": "extra",
+      "amountCents": 2000,
+      "outcome": "paid",
+      "runningCents": 22000
+     },
+     {
+      "key": "sam-big-shop@2027-01-02",
+      "date": "2027-01-02",
+      "ruleId": "sam-big-shop",
+      "recipientId": "sam",
+      "kind": "extra",
+      "amountCents": 2000,
+      "outcome": "paid",
+      "runningCents": 24000
+     },
+     {
+      "key": "sam-groceries@2027-01-08",
+      "date": "2027-01-08",
+      "ruleId": "sam-groceries",
+      "recipientId": "sam",
+      "kind": "recurring",
+      "amountCents": 5000,
+      "outcome": "paid",
+      "runningCents": 29000
+     },
+     {
+      "key": "sam-groceries@2027-01-15",
+      "date": "2027-01-15",
+      "ruleId": "sam-groceries",
+      "recipientId": "sam",
+      "kind": "recurring",
+      "amountCents": 5000,
+      "outcome": "paid",
+      "runningCents": 34000
+     },
+     {
+      "key": "sam-groceries@2027-01-22",
+      "date": "2027-01-22",
+      "ruleId": "sam-groceries",
+      "recipientId": "sam",
+      "kind": "recurring",
+      "amountCents": 5000,
+      "outcome": "paid",
+      "runningCents": 39000
+     },
+     {
+      "key": "sam-groceries@2027-01-29",
+      "date": "2027-01-29",
+      "ruleId": "sam-groceries",
+      "recipientId": "sam",
+      "kind": "recurring",
+      "amountCents": 5000,
+      "outcome": "paid",
+      "runningCents": 44000
+     }
+    ],
+    "capId": "cap-total",
+    "totalCents": 44000,
+    "limitCents": 40000,
+    "replayConfirmed": true,
+    "refusedGuaranteed": [
+     {
+      "ruleId": "sam-groceries",
+      "date": "2027-01-29",
+      "amountCents": 5000
+     }
+    ]
+   },
+   "core": [
+    "sam-groceries",
+    "ava-day-1",
+    "sam-big-shop",
+    "cap-total"
+   ]
+  },
+  "stats": {
+   "checks": 21,
+   "ms": 3056,
+   "booleans": 365,
+   "shapes": 5
+  }
+ },
+ "repairs": [
+  {
+   "id": "add_skip:sam-big-shop",
+   "kind": "add_skip",
+   "title": "Add a skip rule",
+   "text": "Skip Sam's $20 extra for \"Sam does a big shop\" in any month where paying it would break the $400 monthly total cap.",
+   "ruleset": {
+    "currency": "USD",
+    "recipients": [
+     {
+      "id": "sam",
+      "name": "Sam Okafor",
+      "email": "sam.okafor.flat@example.com",
+      "role": "Flatmate · groceries"
+     },
+     {
+      "id": "ava",
+      "name": "Ava Reyes",
+      "email": "ava.reyes.brightline@example.com",
+      "role": "Brightline Bookkeeping · retainer"
+     }
+    ],
+    "rules": [
+     {
+      "kind": "recurring",
+      "id": "sam-groceries",
+      "recipientId": "sam",
+      "amountCents": 5000,
+      "schedule": {
+       "every": "week",
+       "weekday": 5
+      },
+      "guarantee": "guaranteed",
+      "purpose": "groceries"
+     },
+     {
+      "kind": "recurring",
+      "id": "ava-day-1",
+      "recipientId": "ava",
+      "amountCents": 15000,
+      "schedule": {
+       "every": "month",
+       "day": 1
+      },
+      "guarantee": "skippable",
+      "purpose": ""
+     },
+     {
+      "kind": "extra",
+      "id": "sam-big-shop",
+      "recipientId": "sam",
+      "amountCents": 2000,
+      "trigger": "Sam does a big shop",
+      "maxPerMonth": 2,
+      "purpose": "big shop"
+     },
+     {
+      "kind": "cap",
+      "id": "cap-total",
+      "scope": {
+       "type": "overall"
+      },
+      "limitCents": 40000
+     },
+     {
+      "kind": "approval",
+      "id": "approval-over-100",
+      "overCents": 10000
+     },
+     {
+      "kind": "approved_recipients",
+      "id": "approved",
+      "recipientIds": [
+       "sam",
+       "ava"
+      ]
+     },
+     {
+      "kind": "skip",
+      "id": "skip-sam-big-shop",
+      "targetRuleId": "sam-big-shop",
+      "capId": "cap-total"
+     }
+    ]
+   },
+   "checks": 5,
+   "ruleId": "skip-sam-big-shop"
+  },
+  {
+   "id": "lower_amount:sam-groceries",
+   "kind": "lower_amount",
+   "title": "Largest safe amount",
+   "text": "Send Sam Okafor $42.00 USD every Friday for groceries. Guaranteed: it must never be skipped.",
+   "ruleset": {
+    "currency": "USD",
+    "recipients": [
+     {
+      "id": "sam",
+      "name": "Sam Okafor",
+      "email": "sam.okafor.flat@example.com",
+      "role": "Flatmate · groceries"
+     },
+     {
+      "id": "ava",
+      "name": "Ava Reyes",
+      "email": "ava.reyes.brightline@example.com",
+      "role": "Brightline Bookkeeping · retainer"
+     }
+    ],
+    "rules": [
+     {
+      "kind": "recurring",
+      "id": "sam-groceries",
+      "recipientId": "sam",
+      "amountCents": 4200,
+      "schedule": {
+       "every": "week",
+       "weekday": 5
+      },
+      "guarantee": "guaranteed",
+      "purpose": "groceries"
+     },
+     {
+      "kind": "recurring",
+      "id": "ava-day-1",
+      "recipientId": "ava",
+      "amountCents": 15000,
+      "schedule": {
+       "every": "month",
+       "day": 1
+      },
+      "guarantee": "skippable",
+      "purpose": ""
+     },
+     {
+      "kind": "extra",
+      "id": "sam-big-shop",
+      "recipientId": "sam",
+      "amountCents": 2000,
+      "trigger": "Sam does a big shop",
+      "maxPerMonth": 2,
+      "purpose": "big shop"
+     },
+     {
+      "kind": "cap",
+      "id": "cap-total",
+      "scope": {
+       "type": "overall"
+      },
+      "limitCents": 40000
+     },
+     {
+      "kind": "approval",
+      "id": "approval-over-100",
+      "overCents": 10000
+     },
+     {
+      "kind": "approved_recipients",
+      "id": "approved",
+      "recipientIds": [
+       "sam",
+       "ava"
+      ]
+     }
+    ]
+   },
+   "checks": 6,
+   "ruleId": "sam-groceries",
+   "fromCents": 5000,
+   "toCents": 4200
+  },
+  {
+   "id": "lower_amount:ava-day-1",
+   "kind": "lower_amount",
+   "title": "Largest safe amount",
+   "text": "Send Ava Reyes $110.00 USD on the 1st of every month. Skippable: a skip rule may drop it.",
+   "ruleset": {
+    "currency": "USD",
+    "recipients": [
+     {
+      "id": "sam",
+      "name": "Sam Okafor",
+      "email": "sam.okafor.flat@example.com",
+      "role": "Flatmate · groceries"
+     },
+     {
+      "id": "ava",
+      "name": "Ava Reyes",
+      "email": "ava.reyes.brightline@example.com",
+      "role": "Brightline Bookkeeping · retainer"
+     }
+    ],
+    "rules": [
+     {
+      "kind": "recurring",
+      "id": "sam-groceries",
+      "recipientId": "sam",
+      "amountCents": 5000,
+      "schedule": {
+       "every": "week",
+       "weekday": 5
+      },
+      "guarantee": "guaranteed",
+      "purpose": "groceries"
+     },
+     {
+      "kind": "recurring",
+      "id": "ava-day-1",
+      "recipientId": "ava",
+      "amountCents": 11000,
+      "schedule": {
+       "every": "month",
+       "day": 1
+      },
+      "guarantee": "skippable",
+      "purpose": ""
+     },
+     {
+      "kind": "extra",
+      "id": "sam-big-shop",
+      "recipientId": "sam",
+      "amountCents": 2000,
+      "trigger": "Sam does a big shop",
+      "maxPerMonth": 2,
+      "purpose": "big shop"
+     },
+     {
+      "kind": "cap",
+      "id": "cap-total",
+      "scope": {
+       "type": "overall"
+      },
+      "limitCents": 40000
+     },
+     {
+      "kind": "approval",
+      "id": "approval-over-100",
+      "overCents": 10000
+     },
+     {
+      "kind": "approved_recipients",
+      "id": "approved",
+      "recipientIds": [
+       "sam",
+       "ava"
+      ]
+     }
+    ]
+   },
+   "checks": 6,
+   "ruleId": "ava-day-1",
+   "fromCents": 15000,
+   "toCents": 11000
+  },
+  {
+   "id": "raise_cap:cap-total",
+   "kind": "raise_cap",
+   "title": "Smallest safe cap",
+   "text": "Never send more than $440.00 USD in total in any calendar month.",
+   "ruleset": {
+    "currency": "USD",
+    "recipients": [
+     {
+      "id": "sam",
+      "name": "Sam Okafor",
+      "email": "sam.okafor.flat@example.com",
+      "role": "Flatmate · groceries"
+     },
+     {
+      "id": "ava",
+      "name": "Ava Reyes",
+      "email": "ava.reyes.brightline@example.com",
+      "role": "Brightline Bookkeeping · retainer"
+     }
+    ],
+    "rules": [
+     {
+      "kind": "recurring",
+      "id": "sam-groceries",
+      "recipientId": "sam",
+      "amountCents": 5000,
+      "schedule": {
+       "every": "week",
+       "weekday": 5
+      },
+      "guarantee": "guaranteed",
+      "purpose": "groceries"
+     },
+     {
+      "kind": "recurring",
+      "id": "ava-day-1",
+      "recipientId": "ava",
+      "amountCents": 15000,
+      "schedule": {
+       "every": "month",
+       "day": 1
+      },
+      "guarantee": "skippable",
+      "purpose": ""
+     },
+     {
+      "kind": "extra",
+      "id": "sam-big-shop",
+      "recipientId": "sam",
+      "amountCents": 2000,
+      "trigger": "Sam does a big shop",
+      "maxPerMonth": 2,
+      "purpose": "big shop"
+     },
+     {
+      "kind": "cap",
+      "id": "cap-total",
+      "scope": {
+       "type": "overall"
+      },
+      "limitCents": 44000
+     },
+     {
+      "kind": "approval",
+      "id": "approval-over-100",
+      "overCents": 10000
+     },
+     {
+      "kind": "approved_recipients",
+      "id": "approved",
+      "recipientIds": [
+       "sam",
+       "ava"
+      ]
+     }
+    ]
+   },
+   "checks": 6,
+   "ruleId": "cap-total",
+   "fromCents": 40000,
+   "toCents": 44000
+  }
+ ]
+}

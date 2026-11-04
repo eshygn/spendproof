@@ -19,6 +19,9 @@ services:
         value: "1"
       - key: DATABASE_PATH
         value: /tmp/spendproof.db
+      # 0.1 CPU: reuse proofs Z3 already produced for the exact same rules (labelled in the UI).
+      - key: SPENDPROOF_STORED_PROOFS
+        value: "1"
       - key: PAYPAL_CLIENT_ID
         sync: false
       - key: PAYPAL_CLIENT_SECRET

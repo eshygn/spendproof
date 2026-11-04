@@ -55,3 +55,49 @@ The brief expected the core to name three rules (Sam's guaranteed Fridays, the b
 - **Bryntum, AG Grid and "Clockout"** appear in the shared environment and brief template but have nothing to do with Spendproof. None of them is a dependency, so `npm install` needs no private registry or licence. `BRYNTUM_EMAIL` and `AG_GRID_LICENSE_KEY` are ignored.
 - **Network:** the PayPal sandbox and the Gemini API were both reachable from the build environment, so no host had to be switched to its mock. Both adapters still fall back to mocks automatically when a host doesn't answer.
 - **Render free plan:** 0.1 CPU and an ephemeral disk. SQLite lives in `/tmp` and is re-seeded on boot. Z3 is noticeably slower there, which the README says.
+
+## Second review (4 Nov): what was checked and what changed
+
+Each point below was checked against the code before anything changed.
+
+### Stored proofs for the hosted demo: real, implemented differently
+
+- **The problem is real.** Render's free plan has 0.1 CPU. Verification takes about 1 to 2 seconds on a laptop, so on that plan expect tens of seconds. Each Z3 query has a 15 s limit and `unknown` fails closed, so a judge could see "not verified" under load. I could not measure Render itself from here.
+- **What I built.** A verification whose input exactly matches a proof Z3 already produced is reused and labelled "proved earlier for these exact rules", with a "Run Z3 again" button. Proofs come from `fixtures/proofs` (the demo rules and the repaired rules) or from earlier runs on the same server.
+- **Changes from the suggestion:**
+  - **Off by default.** It is on only where `SPENDPROOF_STORED_PROOFS=1` is set, which is `render.yaml`. Local runs and the demo video always run Z3 live, so "fails in about a second" stays true on camera.
+  - **Not keyed on the rules hash.** The rules hash includes recipient emails, so the `SANDBOX_RECEIVER_*` overrides would change it and every lookup would miss. The key (`src/domain/proofKey.ts`) covers what the proof depends on: rules, recipient IDs, start date, horizon length, payment history and a verifier version.
+  - **Stored repairs are re-attached to the current recipients** before use, so applying one never swaps your sandbox emails back to the demo ones.
+  - **Fixtures can't go stale silently.** `tests/proofs.test.ts` recomputes every stored proof (and its repairs) with live Z3 and fails on any difference. `npm run proofs:record` regenerates them.
+- **Found while doing this: the counterexample was not deterministic.** Z3 may return any event days that break the cap. Depending on what ran earlier in the same Z3 context, it sometimes chose a big shop on 30 January, after Sam's last Friday. The cap still broke, but "Sam's 29 Jan payment would be refused" disappeared from the story. The story optimisation now also minimises the event days, which makes the counterexample unique: big shops on 1 and 2 January, $440, Sam refused on 29 January. A test runs it twice in one context and checks the story is identical.
+
+### Sandbox receivers ending SUCCESS: real, not fixable from here
+
+- With `SANDBOX_RECEIVER_SAM` and `SANDBOX_RECEIVER_AVA` set (both values checked: no spaces or quotes), seven live payouts still ended `UNCLAIMED` with `RECEIVER_UNREGISTERED`. PayPal's sandbox does not recognise those two addresses. The likely cause is that they belong to a different developer login from the REST app's credentials.
+- I did not change the fixtures or docs to claim `SUCCESS`, because it was never observed. The mock fixture already uses PayPal's documented `SUCCESS` response shape.
+- The README now says the receivers must be personal sandbox accounts from the same developer login as the app.
+
+### Trim the opening narration: real, done
+
+- The old scene-one line was 48 words, about 19 to 20 seconds at a normal pace, which leaves no room inside 20 seconds. It is now about 35 words.
+- I dropped "Spendproof fixes both", because the next scene shows it instead of saying it.
+
+### The product critiques in the spec review
+
+- **"Eat your vegetables."** This is partly right for the grand prizes, but the listed judges are mostly PayPal developer advocates and engineers plus sponsor engineers, and the demo has a villain: the phishing email fails live. That is a pitch question, not a code change.
+- **The gap between what you said and what the rules say.** This is real and can't be closed, which is why the product doesn't claim to. The rules are shown in template English (not written by the model) and confirmed by the person. Anything the model couldn't express is listed back. Every claim in the UI and README says "verifies the rules you confirmed, not your intent". No change.
+- **"Why not SQL?"**
+  - Enforcement *is* the SQL-style check: the gatekeeper sums the month's payments and compares them with the cap.
+  - The solver earns its place with things a running total can't do before any money moves: the interplay of guaranteed payments, skippable extras and a cap across every possible event sequence; a minimal unsat core naming the colliding rules; and repairs that are proved before they are offered.
+  - Honest residual: a hand-written worst-case simulator could also find January 2027 for this particular demo. We don't claim otherwise. A randomised test checks that Z3 and the simulator agree. No change.
+- **"PayPal use is the thinnest, only Payouts."** Out of date. The app also uses Orders v2 through `@paypal/paypal-server-sdk` with the JS SDK buttons for top-ups, plus sandbox negative testing for the failure path.
+- **Where the spec and the build differ, on purpose:**
+  - **Gemini, not Claude.** The build brief required Gemini.
+  - **Seven rule kinds**, because the skip rule is its own kind.
+  - **The gatekeeper names three rules** for the landlord email: approved recipients, the $400 cap and approval over $100.
+  - **The unsat core has four rules** (see above).
+
+### From the hackathon page
+
+- The video must be under 3 minutes. The script targets 2:45.
+- Render sponsors three "Best Use of Render" prizes, so the hosted copy matters, which is a second reason for stored proofs.

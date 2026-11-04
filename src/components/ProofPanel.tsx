@@ -69,7 +69,7 @@ export function ProofPanel({ state, run, busy, onActivated }: { state: Snapshot;
           <span className="hash">{ver.hash}</span>
           <div className="right">
             {shown.status === "draft" ? (
-              <Btn size="sm" kind="ghost" busy={busy === "verify"} onClick={() => run("verify", { type: "verify", id: shown.id })}>Re-run</Btn>
+              <Btn size="sm" kind="ghost" busy={busy === "verify"} onClick={() => run("verify", { type: "verify", id: shown.id, force: true })}>Run Z3 again</Btn>
             ) : null}
           </div>
         </div>
@@ -87,6 +87,12 @@ export function ProofPanel({ state, run, busy, onActivated }: { state: Snapshot;
             <span><b>{report.horizon.months}</b> months, <b>{report.stats.shapes}</b> distinct shapes</span>
             <span><b>{(report.stats.ms / 1000).toFixed(1)}s</b></span>
           </div>
+          {report.reused ? (
+            <p className="tiny muted" style={{ margin: 0 }}>
+              Proved earlier for these exact rules and start date ({report.reused.source === "fixture" ? "stored with the app" : "earlier run on this server"}), so this result was
+              reused instead of re-running Z3 on this slow free host. Use “Run Z3 again” to check it live.
+            </p>
+          ) : null}
         </div>
       </div>
 

@@ -1,0 +1,242 @@
+{
+ "key": "pk_f4d020d8cb58dd7fcf410343",
+ "provedAt": "2026-11-04T17:25:58.295Z",
+ "report": {
+  "verdict": "verified",
+  "horizon": {
+   "start": "2026-11-01",
+   "end": "2027-10-31",
+   "months": 12
+  },
+  "months": [
+   {
+    "month": "2026-11",
+    "label": "November 2026",
+    "from": "2026-11-01",
+    "caps": [
+     {
+      "capId": "cap-total",
+      "limitCents": 40000,
+      "worstCaseCents": 39000,
+      "status": "proved"
+     }
+    ],
+    "guarantee": "proved",
+    "guaranteedCount": 4,
+    "uncertainEvents": 30,
+    "sameShapeAs": null
+   },
+   {
+    "month": "2026-12",
+    "label": "December 2026",
+    "from": "2026-12-01",
+    "caps": [
+     {
+      "capId": "cap-total",
+      "limitCents": 40000,
+      "worstCaseCents": 39000,
+      "status": "proved"
+     }
+    ],
+    "guarantee": "proved",
+    "guaranteedCount": 4,
+    "uncertainEvents": 31,
+    "sameShapeAs": "2026-11"
+   },
+   {
+    "month": "2027-01",
+    "label": "January 2027",
+    "from": "2027-01-01",
+    "caps": [
+     {
+      "capId": "cap-total",
+      "limitCents": 40000,
+      "worstCaseCents": 40000,
+      "status": "proved"
+     }
+    ],
+    "guarantee": "proved",
+    "guaranteedCount": 5,
+    "uncertainEvents": 31,
+    "sameShapeAs": null
+   },
+   {
+    "month": "2027-02",
+    "label": "February 2027",
+    "from": "2027-02-01",
+    "caps": [
+     {
+      "capId": "cap-total",
+      "limitCents": 40000,
+      "worstCaseCents": 39000,
+      "status": "proved"
+     }
+    ],
+    "guarantee": "proved",
+    "guaranteedCount": 4,
+    "uncertainEvents": 28,
+    "sameShapeAs": "2026-11"
+   },
+   {
+    "month": "2027-03",
+    "label": "March 2027",
+    "from": "2027-03-01",
+    "caps": [
+     {
+      "capId": "cap-total",
+      "limitCents": 40000,
+      "worstCaseCents": 39000,
+      "status": "proved"
+     }
+    ],
+    "guarantee": "proved",
+    "guaranteedCount": 4,
+    "uncertainEvents": 31,
+    "sameShapeAs": "2026-11"
+   },
+   {
+    "month": "2027-04",
+    "label": "April 2027",
+    "from": "2027-04-01",
+    "caps": [
+     {
+      "capId": "cap-total",
+      "limitCents": 40000,
+      "worstCaseCents": 40000,
+      "status": "proved"
+     }
+    ],
+    "guarantee": "proved",
+    "guaranteedCount": 5,
+    "uncertainEvents": 30,
+    "sameShapeAs": null
+   },
+   {
+    "month": "2027-05",
+    "label": "May 2027",
+    "from": "2027-05-01",
+    "caps": [
+     {
+      "capId": "cap-total",
+      "limitCents": 40000,
+      "worstCaseCents": 39000,
+      "status": "proved"
+     }
+    ],
+    "guarantee": "proved",
+    "guaranteedCount": 4,
+    "uncertainEvents": 31,
+    "sameShapeAs": "2026-11"
+   },
+   {
+    "month": "2027-06",
+    "label": "June 2027",
+    "from": "2027-06-01",
+    "caps": [
+     {
+      "capId": "cap-total",
+      "limitCents": 40000,
+      "worstCaseCents": 39000,
+      "status": "proved"
+     }
+    ],
+    "guarantee": "proved",
+    "guaranteedCount": 4,
+    "uncertainEvents": 30,
+    "sameShapeAs": "2026-11"
+   },
+   {
+    "month": "2027-07",
+    "label": "July 2027",
+    "from": "2027-07-01",
+    "caps": [
+     {
+      "capId": "cap-total",
+      "limitCents": 40000,
+      "worstCaseCents": 40000,
+      "status": "proved"
+     }
+    ],
+    "guarantee": "proved",
+    "guaranteedCount": 5,
+    "uncertainEvents": 31,
+    "sameShapeAs": null
+   },
+   {
+    "month": "2027-08",
+    "label": "August 2027",
+    "from": "2027-08-01",
+    "caps": [
+     {
+      "capId": "cap-total",
+      "limitCents": 40000,
+      "worstCaseCents": 39000,
+      "status": "proved"
+     }
+    ],
+    "guarantee": "proved",
+    "guaranteedCount": 4,
+    "uncertainEvents": 31,
+    "sameShapeAs": "2026-11"
+   },
+   {
+    "month": "2027-09",
+    "label": "September 2027",
+    "from": "2027-09-01",
+    "caps": [
+     {
+      "capId": "cap-total",
+      "limitCents": 40000,
+      "worstCaseCents": 39000,
+      "status": "proved"
+     }
+    ],
+    "guarantee": "proved",
+    "guaranteedCount": 4,
+    "uncertainEvents": 30,
+    "sameShapeAs": null
+   },
+   {
+    "month": "2027-10",
+    "label": "October 2027",
+    "from": "2027-10-01",
+    "caps": [
+     {
+      "capId": "cap-total",
+      "limitCents": 40000,
+      "worstCaseCents": 40000,
+      "status": "proved"
+     }
+    ],
+    "guarantee": "proved",
+    "guaranteedCount": 5,
+    "uncertainEvents": 31,
+    "sameShapeAs": "2027-01"
+   }
+  ],
+  "properties": [
+   {
+    "id": "cap:cap-total",
+    "kind": "cap",
+    "ruleId": "cap-total",
+    "status": "proved",
+    "firstBrokenMonth": null
+   },
+   {
+    "id": "guarantee:sam-groceries",
+    "kind": "guarantee",
+    "ruleId": "sam-groceries",
+    "status": "proved",
+    "firstBrokenMonth": null
+   }
+  ],
+  "failure": null,
+  "stats": {
+   "checks": 15,
+   "ms": 887,
+   "booleans": 365,
+   "shapes": 5
+  }
+ },
+ "repairs": null
+}

@@ -13,6 +13,7 @@ import { formatMoney, fromDecimalString, type Cents } from "@/lib/money";
 import { authorRules, readMessage } from "./adapters/ai";
 import { paypal } from "./adapters/paypal";
 import { db, getMeta, logActivity, setMeta } from "./db";
+import { findProof, rebaseRepairs, rememberProof } from "./proofs";
 import { withZ3 } from "./z3";
 
 export function rulesHash(rs: Ruleset): string {
@@ -165,16 +166,26 @@ export function verificationForHash(hash: string): VerificationRow | null {
   return r ? toVerification(r) : null;
 }
 
-export async function verifyRuleset(id: number): Promise<VerificationRow> {
+export async function verifyRuleset(id: number, opts: { force?: boolean } = {}): Promise<VerificationRow> {
   const row = getRuleset(id);
   if (!row) throw new Error("No such ruleset");
   if (!row.confirmed) throw new Error("Confirm the rules first: Spendproof verifies the rules you confirmed.");
   const start = horizonStart();
   const history = paidHistory();
-  const report = await withZ3((Z) => verify(Z, { ruleset: row.ruleset, start, history }));
+  const input = { ruleset: row.ruleset, start, history };
+  const stored = opts.force ? null : findProof(input);
+  let report: VerifyReport;
+  let repairs: Repair[] | null = null;
+  if (stored) {
+    report = { ...stored.report, reused: { source: stored.source, provedAt: stored.provedAt } };
+    repairs = stored.repairs ? rebaseRepairs(stored.repairs, row.ruleset) : null;
+  } else {
+    report = await withZ3((Z) => verify(Z, input));
+    rememberProof(input, report);
+  }
   const info = db()
-    .prepare("INSERT INTO verifications (ruleset_id, hash, start, end_date, verdict, report) VALUES (?, ?, ?, ?, ?, ?)")
-    .run(id, row.hash, start, report.horizon.end, report.verdict, JSON.stringify(report));
+    .prepare("INSERT INTO verifications (ruleset_id, hash, start, end_date, verdict, report, repairs) VALUES (?, ?, ?, ?, ?, ?, ?)")
+    .run(id, row.hash, start, report.horizon.end, report.verdict, JSON.stringify(report), repairs ? JSON.stringify(repairs) : null);
   logActivity(
     clock(),
     report.verdict === "verified" ? "verify" : "verify-fail",
@@ -200,6 +211,7 @@ export async function repairsFor(id: number): Promise<Repair[]> {
     suggestRepairs(Z, { ruleset: row.ruleset, start: ver.start, history: paidHistory(), report: ver.report }),
   );
   db().prepare("UPDATE verifications SET repairs = ? WHERE id = ?").run(JSON.stringify(repairs), ver.id);
+  rememberProof({ ruleset: row.ruleset, start: ver.start, history: paidHistory() }, ver.report, repairs);
   return repairs;
 }
 

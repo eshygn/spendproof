@@ -29,7 +29,7 @@ const Action = z.discriminatedUnion("type", [
   z.object({ type: z.literal("author"), text: z.string().min(3).max(2000) }),
   z.object({ type: z.literal("saveJson"), json: z.unknown() }),
   z.object({ type: z.literal("confirm"), id: z.number().int() }),
-  z.object({ type: z.literal("verify"), id: z.number().int() }),
+  z.object({ type: z.literal("verify"), id: z.number().int(), force: z.boolean().optional() }),
   z.object({ type: z.literal("repairs"), id: z.number().int() }),
   z.object({ type: z.literal("applyRepair"), id: z.number().int(), repairId: z.string() }),
   z.object({ type: z.literal("activate"), id: z.number().int() }),
@@ -58,7 +58,7 @@ export async function POST(req: Request) {
       case "confirm":
         return NextResponse.json({ draft: confirmDraft(a.id) });
       case "verify":
-        return NextResponse.json({ verification: await verifyRuleset(a.id) });
+        return NextResponse.json({ verification: await verifyRuleset(a.id, { force: a.force }) });
       case "repairs":
         return NextResponse.json({ repairs: await repairsFor(a.id) });
       case "applyRepair":
