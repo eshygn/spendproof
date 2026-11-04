@@ -99,7 +99,7 @@ export async function authorFromText(text: string) {
   const ai = await authorRules(text);
   const { ruleset, unsupported } = toRuleset(ai.input, contacts());
   const row = insertDraft(ruleset, ai.source === "recorded" ? "recorded" : "ai", text, ai.note, unsupported, false);
-  logActivity(clock(), "author", `Rules drafted from plain English (${ai.source === "live" ? ai.model : ai.source}).`);
+  logActivity(clock(), "author", `Rules drafted from plain English (${ai.source === "live" ? ai.model : ai.source === "cache" ? `cached ${ai.model} response` : "recorded response"}).`);
   return { draft: row, ai: { source: ai.source, model: ai.model, note: ai.note } };
 }
 

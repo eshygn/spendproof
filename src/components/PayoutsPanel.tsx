@@ -78,7 +78,7 @@ export function PayoutsPanel({ state, run, busy }: { state: Snapshot; run: Run; 
                         <div style={{ fontWeight: 600 }}>{p.recipientName}</div>
                         <div className="tiny muted mono">{p.receiver}</div>
                       </td>
-                      <td className="hide-sm small">
+                      <td className="hide-sm small" style={{ minWidth: 150 }}>
                         {title(p.ruleId)}
                         {p.retryOf ? <span className="pill accent" style={{ marginLeft: 6 }}>retry</span> : null}
                       </td>
@@ -93,9 +93,8 @@ export function PayoutsPanel({ state, run, busy }: { state: Snapshot; run: Run; 
                         {p.status === "blocked" ? <div className="tiny" style={{ color: "var(--breach)", marginTop: 3 }}>{p.verdict.violations.map((v) => v.ruleTitle).join(", ")}</div> : null}
                       </td>
                       <td className="hide-sm"><span className="hash">{p.rulesHash}</span></td>
-                      <td className="hide-sm tiny mono muted">
-                        {b?.paypal_batch_id ? <div>batch {b.paypal_batch_id}</div> : b ? <div>{b.sender_batch_id}</div> : null}
-                        {p.payoutItemId ? <div>item {p.payoutItemId}</div> : null}
+                      <td className="hide-sm tiny mono muted nw" title={[b?.sender_batch_id, p.payoutItemId && `item ${p.payoutItemId}`, p.transactionId && `txn ${p.transactionId}`].filter(Boolean).join(" · ")}>
+                        {b?.paypal_batch_id ? <>batch {b.paypal_batch_id}</> : b ? <>not created</> : <>—</>}
                       </td>
                       <td className="r">
                         {p.status === "failed" && !p.retriedBy ? (
