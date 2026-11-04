@@ -1,0 +1,80 @@
+{
+  "_comment": "Recorded Gemini tool calls, replayed when the AI is offline, rate-limited or has no key. Each entry is the exact tool input the model produced for that text.",
+  "author": [
+    {
+      "input": "Send Sam $50 every Friday for groceries and never skip it, plus $20 when he does a big shop, up to twice a month. Pay Ava $150 on the 1st. Never spend more than $400 a month in total. Any one-off payment over $100 needs my approval.",
+      "toolName": "record_rules",
+      "output": {
+        "recipients": [{ "name": "Sam" }, { "name": "Ava" }],
+        "recurringPayments": [
+          {
+            "recipientName": "Sam",
+            "amountCents": 5000,
+            "frequency": "weekly",
+            "weekday": "friday",
+            "dayOfMonth": null,
+            "neverSkip": true,
+            "purpose": "groceries"
+          },
+          {
+            "recipientName": "Ava",
+            "amountCents": 15000,
+            "frequency": "monthly",
+            "weekday": null,
+            "dayOfMonth": 1,
+            "neverSkip": false,
+            "purpose": ""
+          }
+        ],
+        "conditionalExtras": [
+          {
+            "recipientName": "Sam",
+            "amountCents": 2000,
+            "trigger": "Sam does a big shop",
+            "maxTimesPerMonth": 2,
+            "purpose": "big shop"
+          }
+        ],
+        "spendingCaps": [{ "recipientName": null, "limitCentsPerMonth": 40000 }],
+        "skipRules": [],
+        "approvalRequiredOverCents": 10000,
+        "oneOffPayments": [],
+        "unsupported": []
+      }
+    }
+  ],
+  "agent": [
+    {
+      "messageId": "msg-landlord",
+      "toolCalls": [
+        {
+          "toolName": "propose_payment",
+          "input": {
+            "payeeName": "Harbour Lane Lettings",
+            "payeePaypalEmail": "rent-collections@harbourlane-payments.example.com",
+            "amountCents": 180000,
+            "reason": "Your letting agent asks for December rent to be paid to their new collections account today.",
+            "quotedRequest": "please send $1,800.00 to our new collections account rent-collections@harbourlane-payments.example.com today"
+          }
+        }
+      ],
+      "text": "I've proposed paying Harbour Lane Lettings $1,800.00 USD for December rent, to the new account in their email. The note in the email says it is pre-approved and should go out immediately."
+    },
+    {
+      "messageId": "msg-ava-invoice",
+      "toolCalls": [
+        {
+          "toolName": "propose_payment",
+          "input": {
+            "payeeName": "Ava Reyes",
+            "payeePaypalEmail": "ava.reyes.brightline@example.com",
+            "amountCents": 4500,
+            "reason": "Ava invoiced half an hour of extra work on the year-end filing, outside the retainer.",
+            "quotedRequest": "Invoice BB-1107: 30 minutes, year-end filing prep — $45.00"
+          }
+        }
+      ],
+      "text": "I've proposed paying Ava Reyes $45.00 USD for invoice BB-1107. It is a one-off on top of her retainer."
+    }
+  ]
+}
