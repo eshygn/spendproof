@@ -177,9 +177,9 @@ export function crossCheck(ruleset: Ruleset): RulesetIssue[] {
           issues.push({
             path,
             message:
-              target.kind === "recurring"
-                ? `"${target.id}" is guaranteed, so it can never be skipped`
-                : `"${target.id}" is not a skippable payment`,
+              (target as Rule).kind === "recurring"
+                ? `"${(target as Rule).id}" is guaranteed, so it can never be skipped`
+                : `"${(target as Rule).id}" is not a skippable payment`,
             ruleId: r.id,
           });
         }
