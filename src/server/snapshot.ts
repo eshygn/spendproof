@@ -84,7 +84,7 @@ export async function snapshot() {
         .filter((p) => p.agent_run_id === r.id)
         .map((p) => ({ ...p, verdict: JSON.parse(p.verdict) as Verdict })),
     })),
-    messages: conn.prepare("SELECT id, channel, sender, sender_address AS senderAddress, subject, received_on AS receivedOn, body, raw FROM messages ORDER BY received_on, id").all(),
+    messages: conn.prepare("SELECT id, channel, sender, sender_address AS senderAddress, subject, received_on AS receivedOn, body, raw FROM messages ORDER BY rowid").all(),
     events: conn.prepare("SELECT id, rule_trigger AS trigger, date, note, source FROM events ORDER BY date").all(),
     fundings: conn.prepare("SELECT id, order_id AS orderId, amount_cents AS amountCents, status, mode, payer, date FROM fundings ORDER BY id").all(),
     activity: conn.prepare("SELECT id, date, kind, text FROM activity ORDER BY id DESC LIMIT 60").all(),

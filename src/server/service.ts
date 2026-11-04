@@ -3,6 +3,7 @@ import { createHash, randomBytes } from "node:crypto";
 import { toRuleset, type Contact } from "@/domain/authoring";
 import { describeRule, ruleTitle } from "@/domain/english";
 import { countsTowardHistory, evaluatePayout, type GateContext, type PaidRecord, type PayoutRequest, type Verdict } from "@/domain/gatekeeper";
+import { canRetry, transition, type PayoutStatus } from "@/domain/payoutStatus";
 import { buildMonthPlan } from "@/domain/plan";
 import { suggestRepairs, type Repair } from "@/domain/repairs";
 import { canonicalJson, parseRuleset, type ExtraRuleT, type Ruleset } from "@/domain/rules";
@@ -176,7 +177,7 @@ export async function verifyRuleset(id: number): Promise<VerificationRow> {
     .run(id, row.hash, start, report.horizon.end, report.verdict, JSON.stringify(report));
   logActivity(
     clock(),
-    "verify",
+    report.verdict === "verified" ? "verify" : "verify-fail",
     report.verdict === "verified"
       ? `Z3 verified rules ${row.hash}: every cap holds and no guaranteed payment is skipped, for every possible sequence of events from ${formatDate(start, { year: true })} to ${formatDate(report.horizon.end, { year: true })}.`
       : report.failure
@@ -358,7 +359,10 @@ export async function pollPayouts(force = false) {
   lastPoll = Date.now();
   const adapter = await paypal();
   const open = db()
-    .prepare("SELECT * FROM batches WHERE paypal_batch_id IS NOT NULL AND status IN ('PENDING', 'PROCESSING') ORDER BY id")
+    .prepare(
+      `SELECT * FROM batches WHERE paypal_batch_id IS NOT NULL AND (status IN ('PENDING', 'PROCESSING', 'NEW')
+         OR id IN (SELECT batch_id FROM payouts WHERE status IN ('pending', 'unclaimed', 'onhold'))) AND polls < 40 ORDER BY id`,
+    )
     .all() as { id: number; paypal_batch_id: string; mode: string; polls: number }[];
   for (const b of open) {
     if (b.mode !== adapter.mode) continue;
@@ -367,10 +371,14 @@ export async function pollPayouts(force = false) {
       db().prepare("UPDATE batches SET status = ?, response = ?, polls = polls + 1 WHERE id = ?").run(res.batch_header.batch_status, JSON.stringify(res), b.id);
       for (const item of res.items) {
         const errors = (item as { errors?: unknown }).errors;
+        const current = db()
+          .prepare("SELECT status FROM payouts WHERE batch_id = ? AND sender_item_id = ?")
+          .get(b.id, item.payout_item.sender_item_id) as { status: PayoutStatus } | undefined;
+        if (!current) continue;
         db()
           .prepare("UPDATE payouts SET status = ?, payout_item_id = ?, transaction_id = ?, error = COALESCE(?, error) WHERE batch_id = ? AND sender_item_id = ?")
           .run(
-            item.transaction_status.toLowerCase(), item.payout_item_id, item.transaction_id || null,
+            transition(current.status, item.transaction_status), item.payout_item_id, item.transaction_id || null,
             errors ? JSON.stringify(errors) : null, b.id, item.payout_item.sender_item_id,
           );
       }
@@ -445,7 +453,7 @@ export async function advanceClock(days: number) {
 
 export async function retryPayout(id: number) {
   const p = db().prepare("SELECT * FROM payouts WHERE id = ?").get(id) as RawPayout | undefined;
-  if (!p || p.status !== "failed" || p.retried_by) throw new Error("Only a failed payout can be retried, once");
+  if (!p || !canRetry(p.status as PayoutStatus, !!p.retried_by)) throw new Error("Only a failed payout can be retried, once");
   const ctx = gateContext();
   if (!ctx) throw new Error("No active rules");
   const req: PayoutRequest = {

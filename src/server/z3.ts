@@ -27,7 +27,12 @@ async function boot(): Promise<Z3Handle> {
   const x = ctx.Int.const("warm");
   s.add(x.gt(0), x.lt(2));
   await s.check();
-  const version = typeof api.Z3.get_full_version === "function" ? api.Z3.get_full_version() : "z3";
+  const o = new ctx.Optimize();
+  o.add(x.gt(0), x.lt(5));
+  o.maximize(x);
+  await o.check();
+  const v = api.Z3.get_version();
+  const version = `${v.major}.${v.minor}.${v.build_number}`;
   return { ctx, version };
 }
 
