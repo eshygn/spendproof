@@ -333,7 +333,9 @@ textarea.json { min-height: 280px; font-family: var(--font-mono), monospace; fon
   .grid-2 { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 640px) {
-  .topbar { padding: 8px 16px; height: auto; flex-wrap: wrap; }
+  .topbar { position: static; padding: 8px 16px; height: auto; flex-wrap: wrap; }
+  .verdict .big { font-size: 21px; }
+  .verdict .glyph { width: 36px; height: 36px; }
   .brand-tag { display: none; }
   .chips { margin-left: 0; width: 100%; }
   .layout { padding: 12px 16px 32px; }
