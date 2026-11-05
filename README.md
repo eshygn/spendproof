@@ -28,7 +28,7 @@ Open http://localhost:3000. Node 22 or newer. With no keys, PayPal and Gemini bo
 2. Z3 finds **January 2027** (five Fridays): the month can reach **$440 > $400**, and the gatekeeper would refuse Sam's guaranteed payment on Fri 29 Jan. The unsat core highlights the rules that collide.
 3. Apply the top repair, **Add a skip rule**. Z3 re-verifies it: every cap holds and Sam never misses a Friday, in all 12 months. Click **Activate rules**.
 4. **Inbox agent**: open the Harbour Lane Lettings email (use **View source** to see the hidden instruction) and click **Ask the agent to handle it**. The agent is fooled and proposes $1,800 to a new account. The gatekeeper blocks it and names the three rules it breaks.
-5. Click **+4 weeks** on the demo clock. The scheduler pays November through PayPal Payouts, one batch per day, each payout stamped with its rules version. The first batch is refused by PayPal (a sandbox negative test, on by default), so click **Retry** on it.
+5. Click **+4 weeks** on the demo clock. The scheduler pays November through PayPal Payouts, one batch per day, each payout stamped with its rules version. The first scheduled batch is refused by PayPal (a sandbox negative test, on by default after a reset), so click **Retry** on it.
 6. **Reset demo** (top right) starts again from 1 Nov 2026.
 
 ---
@@ -38,9 +38,9 @@ Open http://localhost:3000. Node 22 or newer. With no keys, PayPal and Gemini bo
 | Where | API | What happens |
 |---|---|---|
 | Paying people | **Payouts API**: `POST /v1/payments/payouts` | The scheduler sends each day's due payments as one **batch payout**. Every item's `note` and the payout row carry the rules version (`rv_…`) that allowed it. |
-| Tracking them | `GET /v1/payments/payouts/{batch_id}` | **Status polling**: batch and item statuses (`PENDING` → `SUCCESS` / `UNCLAIMED` / `FAILED` …) are copied onto a payout state machine and shown in **Payout history**. |
+| Tracking them | `GET /v1/payments/payouts/{batch_id}` | **Status polling**: batch and item statuses (`PENDING` → `SUCCESS` / `UNCLAIMED` / `FAILED` …) are copied onto a payout state machine and shown in the **Payouts** table. That table is Spendproof's own record, built from these PayPal responses; it does not import PayPal's transaction history. |
 | A failed payout | Sandbox negative testing (`PayPal-Mock-Response: INSUFFICIENT_FUNDS`) | A demo switch makes PayPal refuse the next batch. The failed payout is shown with PayPal's error and can be **retried once**. The retry is a new payout that the gatekeeper re-checks against the current history. |
-| Funding the balance | **Orders v2** through `@paypal/paypal-server-sdk` (`OrdersController.createOrder` / `captureOrder`), plus **PayPal JS SDK buttons** (`@paypal/react-paypal-js`) | The person tops up the balance that payouts are drawn from. The gatekeeper refuses any payout the balance can't cover. |
+| Funding the balance | **Orders v2** through `@paypal/paypal-server-sdk` (`OrdersController.createOrder` / `captureOrder`), plus **PayPal JS SDK buttons** (`@paypal/react-paypal-js`) | The person tops up the balance that payouts are drawn from. The gatekeeper refuses any payout the balance can't cover. The balance is Spendproof's own ledger (top-ups minus payouts, starting from a seeded $400), not a reading of the PayPal account. |
 | Auth | `OAuthAuthorizationController.requestToken` (server SDK) | Client-credentials token, cached until expiry, also used for the Payouts REST calls (the server SDK has no Payouts controller). |
 
 The PayPal client secret lives only in the server process. The AI agent has no access to it, to the PayPal adapter or to the scheduler.
@@ -52,7 +52,7 @@ Gemini through the **Vercel AI SDK** (`ai` + `@ai-sdk/google`). Both uses are **
 1. **Authoring:** `record_rules` turns plain English into a flat, strict schema (recurring payments, conditional extras, caps, skip rules, approval threshold, one-offs, plus `unsupported` for anything it couldn't express). Deterministic code converts that into the rules JSON and validates it with zod (integer cents, known recipients, no skip rule on a guaranteed payment). The plain English you confirm is generated **from a fixed template, not by the model**.
 2. **Untrusted inbox agent:** reads pasted emails and messages and can call `propose_payment`. That is its only capability. Every proposal goes through the gatekeeper, which blocks anything that breaks a rule and names the rule.
 
-The model is `AI_MODEL`, or `gemini-3.8-flash` (the newest Flash on the free tier) when that is empty. If it is overloaded the app falls back to `gemini-2.5-flash`. Calls are cached in SQLite and rate-limited (8 per minute). On a rate limit, an outage or a missing key, Spendproof replays **recorded responses** and the AI chip says why.
+The model is `AI_MODEL`, or `gemini-3.8-flash` (the newest Flash on the free tier) when that is empty. If it is overloaded or out of free-tier quota, the app falls back to `gemini-2.5-flash`. Calls are cached in SQLite and rate-limited (8 per minute). On a rate limit, an outage or a missing key, Spendproof replays **recorded responses** and the AI chip says why.
 
 ## How the proof works
 
@@ -85,6 +85,39 @@ In the demo, the minimal core contains **four** rules: Sam's guaranteed Fridays,
 
 `src/domain` is pure TypeScript (rules, calendar, plan, simulator, verifier, repairs, gatekeeper, payout state machine) and is what the tests cover.
 
+The five files that matter most, and the decisions behind them: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). Every trade-off and what was rejected: [DECISIONS.md](DECISIONS.md).
+
+## What's real, what's simulated, and known limits
+
+Checked on 5 Nov 2026 from a clean clone: lint, typecheck, 49 tests and the production build pass, and the whole demo story was driven in a real browser against the production build, in mock mode and in live mode.
+
+**Works end to end in live sandbox mode**
+- Z3 verification, counterexample, unsat core, repairs and re-verification (Z3 is never mocked).
+- Gemini rule drafting through the `record_rules` tool (it ran live on `gemini-2.5-flash`).
+- Real PayPal sandbox batch payouts, status polling, the injected `INSUFFICIENT_FUNDS` failure and the retry.
+- The gatekeeper blocking the landlord payment, allowing a $45 invoice, and the skip rule skipping extras on the day.
+- Creating a PayPal Checkout order through the server SDK.
+
+**Only verified in mock mode, or not end to end**
+- **Payouts ending `SUCCESS`.** The configured sandbox receivers are not recognised by the sandbox (`RECEIVER_UNREGISTERED`), so live payouts end `UNCLAIMED`. Mock mode shows `SUCCESS`.
+- **Capturing a top-up.** This needs a sandbox buyer to approve the order in the PayPal popup, which can't be automated here. Capture is tested in mock mode only.
+- **The live inbox agent.** When the Gemini free-tier quota is used up (HTTP 429), the agent replays its recorded response and the chip says so. A live model may also decline to propose the phishing payment at all; the recorded response is the reliable demo path.
+
+**Simulated on purpose**
+- The demo clock, and the scheduler's "end of day" run when the clock jumps.
+- The big-shop events: seeded on fixed dates, plus a "Log it today" button.
+- The October top-up that seeds the $400 balance.
+- The inbox messages (paste only; there is no email integration).
+- The fictional recipients.
+- The PayPal failure, which is real PayPal sandbox behaviour triggered deliberately.
+
+**Known limits**
+- **Speed.** Verification takes 1 to 3 seconds on a laptop, not the "about a second" of the original brief.
+- **The unsat core has four rules, not three.** See DECISIONS.md.
+- **The approval step is never reached in the demo story.** With the $400 cap, a one-off over $100 already fails the room-reserved check first. The step is unit-tested only.
+- **No sign-in.** Anyone with the hosted URL shares one demo state and can reset it.
+- **The Render deploy has not been tried yet**, and the free plan's 512 MB of memory is untested for the build.
+
 ## Live sandbox keys
 
 1. Create a **sandbox REST app** at developer.paypal.com → Apps & Credentials → Sandbox. Make sure *Payouts* is enabled for it.
@@ -101,7 +134,8 @@ npm run dev        # development server (mock mode when no keys are set)
 npm run dev:mock   # force mock mode even with keys present
 npm run lint       # ESLint (next/core-web-vitals + typescript)
 npm run typecheck  # tsc --noEmit
-npm test           # Vitest: money, calendar, schemas, simulator, Z3 vs simulator, repairs, gatekeeper, state machine
+npm test           # Vitest: money, calendar, schemas, simulator, Z3 vs simulator, repairs, gatekeeper, state machine, stored proofs
+npm run proofs:record  # regenerate fixtures/proofs after changing the verifier
 npm run build      # production build
 ```
 

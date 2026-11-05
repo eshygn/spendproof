@@ -2,7 +2,7 @@
 
 **Project name:** Spendproof
 **Tagline:** Spending rules for an AI payment agent, proved with Z3 before any money moves and enforced on every PayPal payout.
-**Prize tracks:** Best Use of Agentic Commerce · Most Creative · Best Use of PayPal + AI
+**Prize tracks:** Best Use of Agentic Commerce · Most Creative · Best Use of PayPal + AI (add Best Use of Render once it is deployed there)
 
 ---
 
@@ -19,31 +19,32 @@ We wanted to let an AI agent handle the money we send to other people: a flatmat
 - Once the rules are verified, a **deterministic scheduler** pays them through **PayPal Payouts** (batch payouts, status polling, failed payouts shown and retryable). Every payout is stamped with the hash of the rules version that allowed it.
 - A **gatekeeper** re-checks every payout against the rules and the actual payment history before calling PayPal.
 - A separate **untrusted chat agent** reads your inbox and can only *propose* payments. It has no PayPal credentials. When a phishing email with a hidden instruction fools it into proposing $1,800 to a new account, the gatekeeper blocks the payment and names the three rules it breaks.
-- You top up the balance that payouts draw from with **PayPal Checkout** (JS SDK buttons + Orders v2).
+- You top up the balance that payouts draw from with **PayPal Checkout** (JS SDK buttons + Orders v2). The balance is Spendproof's own ledger of top-ups and payouts.
 
 ## How we built it
 
 - **Next.js 16 (App Router) + TypeScript**, one Node service. SQLite through better-sqlite3, seeded on boot, with a demo clock that jumps forward and a Reset button.
-- **Z3** (`z3-solver` WebAssembly), server only and initialised once. The calendar is computed in TypeScript. Each month is encoded with per-day event Booleans, running totals, skip-rule and cap-enforcement constraints, tracked assertions for unsat cores (shrunk to a minimal core), and `Optimize` for the worst-case chart. Months with the same shape share one proof, so 12 months need 5 proofs and verification takes about a second or two on a laptop.
+- **Z3** (`z3-solver` WebAssembly), server only and initialised once. The calendar is computed in TypeScript. Each month is encoded with per-day event Booleans, running totals, skip-rule and cap-enforcement constraints, tracked assertions for unsat cores (shrunk to a minimal core), and `Optimize` for the worst-case chart. Months with the same shape share one proof, so 12 months need 5 proofs and verification takes one to three seconds on a laptop.
 - **A plain TypeScript simulator** is the reference semantics. Every Z3 counterexample is replayed through it at runtime and in tests, and a randomised test checks that Z3 and the simulator agree on generated rulesets.
 - **Gemini via the Vercel AI SDK**, using tool calls with zod schemas only: `record_rules` for authoring, `propose_payment` for the inbox agent. Responses are cached and rate-limited, with a fallback model and recorded responses when the API is busy.
 - **PayPal:** `@paypal/paypal-server-sdk` for OAuth and Orders v2 (top-ups), the Payouts REST API for batch payouts and polling, sandbox negative testing for a real failure path, and `@paypal/react-paypal-js` buttons loaded client-side only.
 - Every external service sits behind an adapter with a live and a mock implementation. The mock is backed by fixture JSON shaped like the documented responses, and status chips show which mode is active.
-- 44 Vitest tests cover money maths, the calendar, the rule and AI tool schemas, the simulator, Z3 counterexamples and proofs, repairs, the gatekeeper and the payout state machine.
+- 49 Vitest tests cover money maths, the calendar, the rule and AI tool schemas, the simulator, Z3 counterexamples and proofs, repairs, the gatekeeper, the payout state machine and the stored proofs.
 
 ## Challenges we ran into
 
 - **Making "skip" mean something precise.** "Skip the extras in months where they'd break the cap" only protects Sam's last Friday if the skip rule looks ahead at the fixed payments still due. We had to pin that down in the simulator and the encoding together.
-- **Speed.** Our first encoding took 12 seconds. A redundant at-most lemma and sharing one proof across months of the same shape brought it to about 1–2 seconds without weakening what is proved. A test checks that sharing doesn't change any verdict.
+- **Speed.** Our first encoding took 12 seconds. A redundant at-most lemma and sharing one proof across months of the same shape brought it to one to three seconds without weakening what is proved. A test checks that sharing doesn't change any verdict.
 - **Honest unsat cores.** The script we wrote said three rules collide. Z3 says four, because Ava's retainer is part of the arithmetic. We minimised the core and showed what Z3 proves.
 - **Gemini's free tier** was often overloaded or over quota while we built. The adapter falls back from model to model and then to recorded responses, and says so on screen.
+- **A nondeterministic story.** Z3 may return any event days that break a cap, and sometimes it picked days that hid the "Sam's Friday would be refused" part of the counterexample. We added a final "earliest days" objective so the same rules always produce the same counterexample.
 
 ## Accomplishments that we're proud of
 
 - A counterexample a person can read: dates, payments, a running total crossing the cap, and the exact rules to blame. Shown 89 days before a database check would notice.
 - A precise claim: "for every possible sequence of events in this horizon, for these rules as confirmed", and nothing more.
 - An AI agent that gets fooled on camera and still can't move a cent.
-- Real sandbox payouts, each traceable to the rules version that allowed it.
+- Real sandbox payouts, each traceable to the rules version that allowed it. (The sandbox left our test payouts unclaimed, because the receiving addresses had no registered sandbox account.)
 
 ## What we learned
 
@@ -54,7 +55,7 @@ We wanted to let an AI agent handle the money we send to other people: a flatmat
 ## What's next
 
 - More rule kinds people actually use: date ranges, pausing a payment, and splitting a bill between flatmates.
-- Re-verifying automatically when history makes a month riskier, and warning before the clash rather than at activation only.
+- Re-verifying automatically as payment history and one-off payments change what is left in a month.
 - Real recipients with PayPal accounts linked through Log in with PayPal, and Payouts webhooks instead of polling.
 - An approval flow on the phone: the gatekeeper's verdict, one tap to approve.
 

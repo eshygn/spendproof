@@ -101,3 +101,36 @@ Each point below was checked against the code before anything changed.
 
 - The video must be under 3 minutes. The script targets 2:45.
 - Render sponsors three "Best Use of Render" prizes, so the hosted copy matters, which is a second reason for stored proofs.
+
+## Final audit (5 Nov)
+
+Checked from a clean clone of `main`:
+- `npm install`, lint, typecheck, 49 tests and the production build all pass.
+- The full demo story was driven in a real browser against `next start`, twice: with no keys at all (mock), and with the live keys (PayPal sandbox and Gemini).
+
+**Works end to end live**
+- Z3 verify, counterexample, core, repairs and re-verify.
+- Gemini rule drafting (`gemini-2.5-flash`; 3.8 was over quota).
+- Sandbox batch payouts with polling.
+- The injected `INSUFFICIENT_FUNDS` failure and its retry.
+- The gatekeeper blocking the landlord payment (three rules named) and allowing the $45 invoice with $350 reserved.
+- The skip rule skipping both November extras after that invoice: Sam got every Friday, and November closed at $395.
+- Creating a Checkout order.
+
+**Not verified live, and why**
+- **Payouts ending `SUCCESS`.** The configured receivers return `RECEIVER_UNREGISTERED`.
+- **Capturing a Checkout order.** It needs a sandbox buyer to approve it in the popup; the capture path is exercised in mock mode only.
+- **The live inbox agent.** Gemini returned 429 on both models during the run, so the recorded response was used and the chip said so.
+
+**Fixed in this pass**
+- **Readable PayPal SDK errors.** `ApiError` from the server SDK arrives with an empty message, so a failed capture showed a blank error. PayPal's own issue and description (for example `ORDER_NOT_APPROVED`) are now passed through.
+- **The demo failure lands on a scheduled payout.** The "refuse the next batch" switch could fire on whichever batch went next, such as an approved one-off. It now applies only to the scheduler's daily batches, so the story always plays the same way.
+- **The mock `INSUFFICIENT_FUNDS` fixture** now carries the message the live sandbox actually returned.
+- **Docs.** Everything the code can't back up was corrected, and the README gained a "What's real, what's simulated, and known limits" section.
+
+**Weak points left as they are, stated plainly**
+- **No `SUCCESS` payouts yet.** That needs registered sandbox receivers on the owner's side.
+- **The approval step is never reached in the demo story.** With the $400 cap, a one-off over $100 always fails the room-reserved check first. It is covered by unit tests only.
+- **No sign-in.** One shared demo state per deployment.
+- **The Render deploy is untried.** The free plan's 512 MB memory is a risk for `next build`.
+- **Verification takes 1 to 3 seconds**, not the brief's "about a second".

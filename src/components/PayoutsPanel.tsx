@@ -170,7 +170,7 @@ export function PayoutsPanel({ state, run, busy }: { state: Snapshot; run: Run; 
             <hr className="sep" />
             <label className="switch">
               <input type="checkbox" checked={state.failNextBatch} onChange={(e) => run("failNext", { type: "failNext", on: e.target.checked })} />
-              Demo: make PayPal refuse the next batch (sandbox negative test, INSUFFICIENT_FUNDS)
+              Demo: make PayPal refuse the next scheduled batch (sandbox negative test, INSUFFICIENT_FUNDS)
             </label>
           </div>
         </div>

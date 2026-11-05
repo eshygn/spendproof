@@ -324,10 +324,15 @@ function insertPayout(req: PayoutRequest, verdict: Verdict, status: string, retr
   return { payoutId: Number(info.lastInsertRowid), senderItemId, receiver: req.recipientEmail, amountCents: req.amountCents, note };
 }
 
-async function sendBatch(date: string, items: QueuedPayout[]) {
+/**
+ * `scheduled`: only the scheduler's daily batches take the demo's injected
+ * PayPal failure, so it always lands on a scheduled payout, never on a retry
+ * or an approved one-off.
+ */
+async function sendBatch(date: string, items: QueuedPayout[], scheduled = false) {
   if (!items.length) return null;
   const adapter = await paypal();
-  const simulateFailure = getMeta("fail_next_batch") === "1";
+  const simulateFailure = scheduled && getMeta("fail_next_batch") === "1";
   if (simulateFailure) setMeta("fail_next_batch", "0");
   const senderBatchId = `spendproof_${date}_${randomBytes(3).toString("hex")}`;
   const request = {
@@ -441,7 +446,7 @@ export async function runDay(date: string): Promise<DayRun> {
       logActivity(date, "blocked", `Gatekeeper refused ${ruleTitle(rs, rule)} on ${formatDate(date)}. Breaks: ${verdict.violations.map((v) => v.ruleTitle).join(", ")}.`);
     }
   }
-  await sendBatch(date, queued);
+  await sendBatch(date, queued, true);
   return run;
 }
 

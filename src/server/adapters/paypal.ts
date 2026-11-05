@@ -1,5 +1,6 @@
 import "server-only";
 import {
+  ApiError,
   CheckoutPaymentIntent,
   Client,
   Environment,
@@ -68,6 +69,20 @@ export interface PayPalAdapter {
 
 // ---------------------------------------------------------------------------
 // Live sandbox
+
+/** The server SDK throws ApiError with an empty message; surface PayPal's own reason. */
+function paypalError(e: unknown): Error {
+  if (!(e instanceof ApiError)) return e as Error;
+  let reason = "";
+  try {
+    const body = JSON.parse(String(e.body)) as { name?: string; message?: string; details?: { issue?: string; description?: string }[] };
+    const d = body.details?.[0];
+    reason = d?.issue ? `${d.issue}: ${d.description ?? ""}` : `${body.name ?? ""} ${body.message ?? ""}`;
+  } catch {
+    reason = String(e.body ?? "").slice(0, 200);
+  }
+  return new Error(`PayPal ${e.statusCode} ${reason}`.trim());
+}
 
 class LivePayPal implements PayPalAdapter {
   mode = "live" as const;
@@ -140,13 +155,17 @@ class LivePayPal implements PayPalAdapter {
         purchaseUnits: [{ amount: { currencyCode: "USD", value: toDecimalString(amountCents) }, description }],
       },
       prefer: "return=minimal",
+    }).catch((e) => {
+      throw paypalError(e);
     });
     return { id: res.result.id as string, status: String(res.result.status) };
   }
 
   async captureOrder(orderId: string): Promise<CapturedOrder> {
     const orders = new OrdersController(this.client);
-    const res = await orders.captureOrder({ id: orderId, prefer: "return=representation" });
+    const res = await orders.captureOrder({ id: orderId, prefer: "return=representation" }).catch((e) => {
+      throw paypalError(e);
+    });
     const capture = res.result.purchaseUnits?.[0]?.payments?.captures?.[0];
     return {
       id: res.result.id as string,
