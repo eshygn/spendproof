@@ -2,7 +2,7 @@
 
 **Project name:** Spendproof
 **Tagline:** Spending rules for an AI payment agent, proved with Z3 before any money moves and enforced on every PayPal payout.
-**Prize tracks:** Best Use of Agentic Commerce · Most Creative · Best Use of PayPal + AI (add Best Use of Render once it is deployed there)
+**Prize tracks:** Best Use of Agentic Commerce · Most Creative · Best Use of PayPal + AI · Best Use of Render
 
 ---
 
@@ -44,7 +44,7 @@ We wanted to let an AI agent handle the money we send to other people: a flatmat
 - A counterexample a person can read: dates, payments, a running total crossing the cap, and the exact rules to blame. Shown 89 days before a database check would notice.
 - A precise claim: "for every possible sequence of events in this horizon, for these rules as confirmed", and nothing more.
 - An AI agent that gets fooled on camera and still can't move a cent.
-- Real sandbox payouts, each traceable to the rules version that allowed it. (The sandbox left our test payouts unclaimed, because the receiving addresses had no registered sandbox account.)
+- Real sandbox payouts, each traceable to the rules version that allowed it. With two personal sandbox accounts as receivers, they end paid.
 
 ## What we learned
 

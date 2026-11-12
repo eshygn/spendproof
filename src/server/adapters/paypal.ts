@@ -289,7 +289,11 @@ async function select(): Promise<PayPalAdapter> {
     await live.accessToken();
     return live;
   } catch (e) {
-    return new MockPayPal(`PayPal sandbox unreachable (${(e as Error).message.slice(0, 80)})`);
+    // The SDK's ApiError has an empty message; a 401 here means the keys, not the network.
+    if (e instanceof ApiError && (e.statusCode === 401 || e.statusCode === 400)) {
+      return new MockPayPal(`PayPal rejected PAYPAL_CLIENT_ID / PAYPAL_CLIENT_SECRET (${e.statusCode})`);
+    }
+    return new MockPayPal(`PayPal sandbox unreachable (${paypalError(e).message.slice(0, 80)})`);
   }
 }
 
