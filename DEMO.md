@@ -4,9 +4,10 @@
 
 **How this is made:** the screen is recorded silently and an AI voice reads the narration. Do it in this order:
 
-1. Paste the **Voiceover text** at the bottom of this file into the AI voice tool and export the audio. Aim for 2:35 to 2:45; if it runs long, raise the speed slightly rather than cutting lines.
-2. Play that audio in headphones while you record the screen, and do each click when the narration reaches it. The timings below are a guide; the audio is the real clock.
-3. Put the audio under the recording in any video editor, trim the start and end, and export.
+1. Record the screen first, following the shots below at a relaxed pace. Don't try to hit the timings exactly; a take of up to about 3:15 is fine, since pauses get trimmed.
+2. Fit the narration to the recording: note when each shot starts, then shorten or pad the matching paragraph of the **Voiceover text** at the bottom of this file so it fits that shot.
+3. Paste the fitted text into the AI voice tool and export the audio, one file per paragraph if the tool allows it, so each can be placed at its shot.
+4. Put the audio under the recording in any video editor, trim the dead time, and export at 2:50 or under.
 
 **Recording setup:** 1440 × 900 browser window, light mode, zoom 100%, no microphone. Use the hosted site, <https://spendproof.onrender.com>, or run locally with live keys (`npm run dev`). The header chips should read **PayPal Sandbox · live** and **AI gemini-…**. If Gemini is busy, the recorded fallback looks the same apart from the AI chip and the agent's "recorded response" label. Do one full practice run first so the Gemini response is cached and Z3 is warm, then click **Reset demo** before the real take; that also re-arms the PayPal failure for the first scheduled batch. Move the mouse slowly, and after each click hold still for two seconds so the screen can be read.
 **On-screen captions** (optional, lower third, in brackets below) mark each PayPal moment; add them in the editor.
