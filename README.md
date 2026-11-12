@@ -12,7 +12,7 @@ People want an AI agent to handle money they send to others: a flatmate's grocer
 
 ## Judge quickstart
 
-**Hosted:** `https://spendproof.onrender.com` *(placeholder: replace with the deployed URL)*. It runs on Render's free plan, so the first load can take about a minute while the service wakes up. The free plan has only 0.1 CPU, so the hosted copy reuses stored Z3 proofs for the demo rules (labelled on screen) and runs everything else live, more slowly than on a laptop.
+**Hosted:** <https://spendproof.onrender.com>. It runs on Render's free plan, so the first load can take about a minute while the service wakes up. The free plan has only 0.1 CPU, so the hosted copy reuses stored Z3 proofs for the demo rules (labelled on screen) and runs everything else live, more slowly than on a laptop.
 
 **Local, one command, no API keys (mock mode):**
 
@@ -116,7 +116,6 @@ Checked on 5 Nov 2026 from a clean clone: lint, typecheck, 49 tests and the prod
 - **The unsat core has four rules, not three.** See DECISIONS.md.
 - **The approval step is never reached in the demo story.** With the $400 cap, a one-off over $100 already fails the room-reserved check first. The step is unit-tested only.
 - **No sign-in.** Anyone with the hosted URL shares one demo state and can reset it.
-- **The Render deploy has not been tried yet**, and the free plan's 512 MB of memory is untested for the build.
 
 ## Live sandbox keys
 

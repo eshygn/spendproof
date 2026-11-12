@@ -2,7 +2,7 @@
 
 **Project name:** Spendproof
 **Tagline:** Spending rules for an AI payment agent, proved with Z3 before any money moves and enforced on every PayPal payout.
-**Prize tracks:** Best Use of Agentic Commerce · Most Creative · Best Use of PayPal + AI (add Best Use of Render once it is deployed there)
+**Prize tracks:** Best Use of Agentic Commerce · Most Creative · Best Use of PayPal + AI · Best Use of Render
 
 ---
 
