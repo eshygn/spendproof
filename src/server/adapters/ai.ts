@@ -25,7 +25,7 @@ import { db } from "../db";
  */
 
 export const DEFAULT_MODEL = "gemini-3.8-flash";
-/** Tried when the configured model is overloaded (HTTP 503). */
+/** Tried when the configured model is overloaded (HTTP 503), rate-limited or times out. */
 const FALLBACK_MODEL = "gemini-2.5-flash";
 const RATE_LIMIT_PER_MINUTE = 8;
 
@@ -112,7 +112,8 @@ async function callModel<T>(run: (model: string) => Promise<T>): Promise<Attempt
             ? `${model} overloaded (503)`
             : `${model}: ${(e as Error).message.slice(0, 120)}`;
       // Quotas and capacity are per model: try the fallback model before giving up.
-      if (status === undefined || ![400, 404, 429, 500, 503].includes(status)) break;
+      // A timeout or dropped connection (no status) is also per model when one is overloaded.
+      if (status !== undefined && ![400, 404, 429, 500, 503].includes(status)) break;
     }
   }
   return { ok: false, reason: `${reason} — using recorded responses` };
