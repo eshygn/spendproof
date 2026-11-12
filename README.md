@@ -97,11 +97,11 @@ Checked on 5 Nov 2026 from a clean clone: lint, typecheck, 49 tests and the prod
 - Real PayPal sandbox batch payouts, status polling, the injected `INSUFFICIENT_FUNDS` failure and the retry.
 - The gatekeeper blocking the landlord payment, allowing a $45 invoice, and the skip rule skipping extras on the day.
 - Creating a PayPal Checkout order through the server SDK.
+- Payouts ending `SUCCESS` with `SANDBOX_RECEIVER_SAM` / `SANDBOX_RECEIVER_AVA` set to personal sandbox accounts, plus a real `INSUFFICIENT_FUNDS` failure and its retry. Without those receivers, live payouts end `UNCLAIMED`.
 
 **Only verified in mock mode, or not end to end**
-- **Payouts ending `SUCCESS`.** The configured sandbox receivers are not recognised by the sandbox (`RECEIVER_UNREGISTERED`), so live payouts end `UNCLAIMED`. Mock mode shows `SUCCESS`.
 - **Capturing a top-up.** This needs a sandbox buyer to approve the order in the PayPal popup, which can't be automated here. Capture is tested in mock mode only.
-- **The live inbox agent.** When the Gemini free-tier quota is used up (HTTP 429), the agent replays its recorded response and the chip says so. A live model may also decline to propose the phishing payment at all; the recorded response is the reliable demo path.
+- **The live inbox agent is not guaranteed.** It ran live and proposed the phishing payment (which the gatekeeper blocked), but when the Gemini free-tier quota is used up (HTTP 429) the agent replays its recorded response and the chip says so. A live model may also decline to propose the payment at all; the recorded response is the reliable demo path.
 
 **Simulated on purpose**
 - The demo clock, and the scheduler's "end of day" run when the clock jumps.
